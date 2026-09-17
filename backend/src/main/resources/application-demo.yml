@@ -1,0 +1,14 @@
+# Activated with SPRING_PROFILES_ACTIVE=demo (and DEMO_MODE=true so clients can also detect it
+# via GET /actuator/info or the login response). Shortens the timers that make a live
+# demonstration painful to sit through; does NOT change any escalation/safety logic itself -
+# EscalationScheduler and TripService run byte-identical code in every profile.
+pinghome:
+  demo-mode: true
+  scheduler:
+    interval-ms: ${PINGHOME_SCHEDULER_INTERVAL_MS:5000}
+  escalation:
+    nudge-timeout-minutes: ${PINGHOME_NUDGE_TIMEOUT_MINUTES:1}
+
+logging:
+  level:
+    com.pinghome.backend: DEBUG

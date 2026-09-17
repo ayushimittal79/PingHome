@@ -1,0 +1,20 @@
+# No Docker/MySQL available in CI or this dev sandbox, so tests run against H2 in MySQL
+# compatibility mode instead of Testcontainers. This is a deliberate tradeoff: it verifies
+# Spring wiring, JPA mappings, security, and business logic, but does NOT verify MySQL-specific
+# SQL dialect quirks - see docs/testing.md for what that means for coverage.
+spring:
+  datasource:
+    url: jdbc:h2:mem:pinghome;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+pinghome:
+  jwt:
+    secret: test-only-secret-not-for-any-real-environment-000000000000
+  sms:
+    enabled: false

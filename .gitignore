@@ -1,0 +1,35 @@
+# --- Backend (Maven/Java) ---
+backend/target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- Android / Gradle ---
+android/.gradle/
+android/build/
+android/*/build/
+android/.idea/
+android/*.iml
+android/local.properties
+android/captures/
+android/.cxx/
+android/*/release/
+
+# --- Wearable (PlatformIO) ---
+wearable/**/.pio/
+wearable/**/.vscode/
+
+# --- Secrets / credentials (never commit real keys) ---
+**/google-services.json
+**/firebase-service-account*.json
+**/*.env
+.env
+*.keystore
+*.jks
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

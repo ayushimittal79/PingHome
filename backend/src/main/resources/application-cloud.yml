@@ -1,0 +1,19 @@
+# Activated with SPRING_PROFILES_ACTIVE=cloud when running on Cloud Run against Cloud SQL for
+# MySQL. All secrets/connection details still come from environment variables (see
+# docs/deployment.md) - this profile only tightens defaults that are fine loose for local dev
+# but shouldn't be for a deployed instance.
+spring:
+  jpa:
+    hibernate:
+      # Schema is expected to already exist (created once via ddl-auto=update from a local run,
+      # or applied manually) - a cloud instance should not silently alter production schema.
+      ddl-auto: validate
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      connection-timeout: 10000
+
+logging:
+  level:
+    com.pinghome.backend: INFO
+    org.hibernate: WARN

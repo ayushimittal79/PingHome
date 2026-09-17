@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: pinghome-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/pinghome?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:pinghome}
+    password: ${DB_PASSWORD:pinghome}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 'update' is convenient for coursework iteration; docs/deployment.md calls out switching
+      # to 'validate' + versioned migrations before anything resembling a real deployment.
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+# --- PingHome-specific configuration -----------------------------------------------------
+pinghome:
+  demo-mode: ${DEMO_MODE:false}
+
+  jwt:
+    # MUST be overridden (PINGHOME_JWT_SECRET) outside local development. This default exists
+    # only so `mvn spring-boot:run` works out of the box for coursework/demo purposes.
+    secret: ${PINGHOME_JWT_SECRET:pinghome-local-development-secret-change-me-please-32bytes+}
+    expiration-minutes: ${PINGHOME_JWT_EXPIRATION_MINUTES:10080} # 7 days
+    issuer: pinghome-backend
+
+  scheduler:
+    # How often the escalation scheduler polls ACTIVE trips. Demo mode shortens this via
+    # DEMO_MODE=true (see application-demo.yml) - the underlying nudge/escalation logic is
+    # identical either way.
+    interval-ms: ${PINGHOME_SCHEDULER_INTERVAL_MS:30000}
+
+  escalation:
+    nudge-timeout-minutes: ${PINGHOME_NUDGE_TIMEOUT_MINUTES:5}
+
+  sos:
+    dedup-seconds: ${PINGHOME_SOS_DEDUP_SECONDS:15}
+
+  firebase:
+    credentials-json: ${PINGHOME_FIREBASE_CREDENTIALS_JSON:}
+    credentials-path: ${PINGHOME_FIREBASE_CREDENTIALS_PATH:}
+
+  sms:
+    enabled: ${PINGHOME_SMS_ENABLED:false}
+    account-sid: ${PINGHOME_TWILIO_ACCOUNT_SID:}
+    auth-token: ${PINGHOME_TWILIO_AUTH_TOKEN:}
+    from-number: ${PINGHOME_TWILIO_FROM_NUMBER:}
+
+logging:
+  level:
+    com.pinghome.backend: INFO
