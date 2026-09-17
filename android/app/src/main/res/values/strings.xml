@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PingHome</string>
+
+    <string name="notification_channel_safety_id">pinghome_safety</string>
+    <string name="notification_channel_safety_name">Safety reminders</string>
+    <string name="notification_channel_escalation_id">pinghome_escalation</string>
+    <string name="notification_channel_escalation_name">Escalations &amp; watcher alerts</string>
+    <string name="notification_channel_fakecall_id">pinghome_fakecall</string>
+    <string name="notification_channel_fakecall_name">Simulated incoming call</string>
+
+    <string name="action_login">Log in</string>
+    <string name="action_register">Create account</string>
+    <string name="action_logout">Log out</string>
+    <string name="action_im_safe">I\'m Safe</string>
+    <string name="action_sos">SOS</string>
+    <string name="action_fake_call">Fake incoming call</string>
+    <string name="action_start_trip">Start trip</string>
+    <string name="action_cancel_trip">Cancel trip</string>
+
+    <string name="tab_my_trips">My Trips</string>
+    <string name="tab_watching">Watching</string>
+    <string name="tab_contacts">Trusted Circle</string>
+    <string name="tab_profile">Profile</string>
+</resources>

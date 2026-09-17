@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'com.pinghome.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.pinghome.app"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "0.1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Read from gradle.properties / -P flags / CI secrets - never hard-code real keys here.
+        // See docs/setup.md for how to obtain both. Placeholders keep the project buildable
+        // (with maps/messaging inert) even before those services are provisioned.
+        manifestPlaceholders += [
+                MAPS_API_KEY: project.findProperty("MAPS_API_KEY") ?: "REPLACE_WITH_GOOGLE_MAPS_API_KEY"
+        ]
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "BASE_URL", "\"${project.findProperty('PINGHOME_API_BASE_URL_DEBUG') ?: 'http://10.0.2.2:8080/'}\""
+            buildConfigField "boolean", "DEMO_MODE", "${project.findProperty('DEMO_MODE') ?: true}"
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", "\"${project.findProperty('PINGHOME_API_BASE_URL') ?: 'https://REPLACE-WITH-CLOUD-RUN-URL/'}\""
+            buildConfigField "boolean", "DEMO_MODE", "false"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.4'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.8.4'
+    implementation 'androidx.activity:activity:1.9.1'
+    implementation 'androidx.fragment:fragment:1.8.2'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.work:work-runtime:2.9.1'
+
+    // Networking
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Location / Maps / Geofencing
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'com.google.android.gms:play-services-maps:19.0.0'
+
+    // Firebase (Cloud Messaging)
+    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation 'com.google.firebase:firebase-messaging'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PingHome palette (SPEC.md UI direction): deep navy/charcoal, off-white surfaces,
+         muted blue, green=safe, amber=warning, red reserved for SOS only. -->
+    <color name="navy_900">#0F1B2D</color>
+    <color name="navy_800">#16243B</color>
+    <color name="charcoal_700">#2A3342</color>
+    <color name="blue_muted">#5B7FA6</color>
+    <color name="blue_muted_dark">#3E5C7D</color>
+    <color name="off_white">#F6F5F1</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_dark">#1B2635</color>
+    <color name="safe_green">#2E7D5B</color>
+    <color name="warning_amber">#B8860B</color>
+    <color name="sos_red">#C0392B</color>
+    <color name="text_primary_light">#1B2230</color>
+    <color name="text_secondary_light">#5C6672</color>
+    <color name="text_primary_dark">#EDEFF2</color>
+    <color name="text_secondary_dark">#AEB7C2</color>
+    <color name="divider">#E2E4E8</color>
+</resources>

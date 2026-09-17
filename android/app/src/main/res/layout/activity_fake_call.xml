@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/navy_900"
+    android:gravity="center_horizontal"
+    android:padding="32dp">
+
+    <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/callerNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/off_white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Incoming call"
+        android:textSize="16sp"
+        android:textColor="@color/off_white"
+        android:alpha="0.75" />
+
+    <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingBottom="24dp">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/declineButton"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginEnd="48dp"
+            android:backgroundTint="@color/sos_red"
+            android:contentDescription="Decline"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/acceptButton"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:backgroundTint="@color/safe_green"
+            android:contentDescription="Accept"
+            android:src="@android:drawable/ic_menu_call" />
+    </LinearLayout>
+</LinearLayout>
