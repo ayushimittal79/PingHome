@@ -37,7 +37,9 @@ The Android module (`android/`) has full source for every mandatory screen and f
 
 ## ESP32 — not run, because there's no ESP32 hardware in the environment this was built in
 
-Firmware source is at `wearable/pinghome-sos/`. Whether it *compiles* against the espressif32 PlatformIO platform is stated in this repository's setup notes/commit history rather than here, since that result depends on when you read this doc - run `pio run` yourself to check current status. Flashing it to a real board, wiring the button, and confirming the physical-press → BLE-notify → Android leg of scenario 5 has **not** been done — that requires hardware this environment doesn't have. This is the single most important thing to verify manually before calling PingHome's wearable integration complete, since SPEC.md is explicit that a software test trigger (see `wearable.md`'s note on the debug-only simulate button) must never stand in for it.
+Firmware source is at `wearable/pinghome-sos/`. It has been **compiled** (`pio run`, espressif32 platform, `esp32dev` board): build succeeded, producing `firmware.bin` - Flash 85.2% (1,116,193 / 1,310,720 bytes, mostly the BLE stack), RAM 12.1% (39,492 / 327,680 bytes). That confirms the code is syntactically and type-correct against the real ESP32 Arduino/BLE APIs, nothing more.
+
+Flashing it to a real board, wiring the button, and confirming the physical-press → BLE-notify → Android leg of scenario 5 has **not** been done — that requires hardware this environment doesn't have. This is the single most important thing to verify manually before calling PingHome's wearable integration complete, since SPEC.md is explicit that a software test trigger (see `wearable.md`'s note on the debug-only simulate button) must never stand in for it.
 
 ## What "done" looks like for this document
 
