@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Cleartext is allowed ONLY for the Android emulator's host-loopback alias, so a debug build
      can talk to a Spring Boot backend running locally on the dev machine (10.0.2.2:8080). Every
-     other destination, including the deployed Cloud Run backend, must use HTTPS. -->
+     other destination, including the deployed Azure backend, must use HTTPS. -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">10.0.2.2</domain>

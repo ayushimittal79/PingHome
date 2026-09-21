@@ -12,7 +12,7 @@ spring:
     hibernate:
       # Schema is owned by Flyway (src/main/resources/db/migration), not Hibernate - this only
       # ever checks the migrated schema matches the entities, never changes it. Same behavior
-      # locally and on Cloud SQL, so there's no "works locally, fails in prod" schema drift.
+      # locally and on Azure MySQL, so there's no "works locally, fails in prod" schema drift.
       ddl-auto: validate
     open-in-view: false
     properties:
@@ -22,10 +22,10 @@ spring:
   flyway:
     # Safe for both a database that already has Hibernate-created tables (e.g. any existing
     # local dev database from before this project used Flyway) and a genuinely empty one (e.g.
-    # a brand-new Cloud SQL instance): if tables already exist but flyway_schema_history doesn't,
+    # a brand-new Azure MySQL server): if tables already exist but flyway_schema_history doesn't,
     # Flyway records the schema as already being at baseline-version and does NOT re-run V1
     # against it. On a truly empty schema, baseline is a no-op and V1__init.sql runs normally -
-    # no manual bootstrap step needed before the first Cloud Run deploy.
+    # no manual bootstrap step needed before the first deployment.
     baseline-on-migrate: true
     baseline-version: "1"
 

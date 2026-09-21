@@ -1,6 +1,6 @@
 # Database
 
-MySQL, accessed through Spring Data JPA/Hibernate. Schema is owned by [Flyway](https://flywaydb.org/) migrations in `backend/src/main/resources/db/migration` (`V1__init.sql` is the full baseline schema, matching the tables below exactly); `spring.jpa.hibernate.ddl-auto=validate` in every profile only checks the migrated schema against the `@Entity` classes and never changes it. This runs identically against local MySQL and Cloud SQL — a brand-new database gets its schema created automatically on first boot, and `baseline-on-migrate` (see `application.yml`) safely adopts a database that already has Hibernate-created tables from before this project used Flyway, without re-running `V1`.
+MySQL, accessed through Spring Data JPA/Hibernate. Schema is owned by [Flyway](https://flywaydb.org/) migrations in `backend/src/main/resources/db/migration` (`V1__init.sql` is the full baseline schema, matching the tables below exactly); `spring.jpa.hibernate.ddl-auto=validate` in every profile only checks the migrated schema against the `@Entity` classes and never changes it. This runs identically against local MySQL and Azure Database for MySQL — a brand-new database gets its schema created automatically on first boot, and `baseline-on-migrate` (see `application.yml`) safely adopts a database that already has Hibernate-created tables from before this project used Flyway, without re-running `V1`.
 
 ## Tables
 

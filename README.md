@@ -41,7 +41,7 @@ docs/          Requirements, architecture, database, API, setup, deployment, clo
 - [docs/database.md](docs/database.md) — schema
 - [docs/api.md](docs/api.md) — REST API reference
 - [docs/setup.md](docs/setup.md) — local dev setup for all three components
-- [docs/deployment.md](docs/deployment.md) — deploying the backend to Cloud Run + Cloud SQL
+- [docs/deployment.md](docs/deployment.md) — deploying the backend to an Azure VM + Azure Database for MySQL
 - [docs/cloud-services.md](docs/cloud-services.md) — which cloud services are used, why, and how to turn off billing after a demo
 - [docs/testing.md](docs/testing.md) — what's actually been tested, and how
 - [docs/wearable.md](docs/wearable.md) — wiring, BLE protocol, flashing the ESP32
