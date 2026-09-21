@@ -4,7 +4,9 @@ SPEC.md is explicit: "Do not claim something was tested if it was not actually t
 
 ## Backend — automated, actually run, passing
 
-`cd backend && ./mvnw test` — 13 integration tests, `@SpringBootTest` + `TestRestTemplate` against an in-memory H2 database (no MySQL/Docker needed to run them; see the tradeoff noted in `src/test/resources/application-test.yml`).
+`cd backend && ./mvnw test` — 13 integration tests (`@SpringBootTest` + `TestRestTemplate` against an in-memory H2 database; no MySQL/Docker needed, see the tradeoff noted in `src/test/resources/application-test.yml`) plus 3 unit tests in `JwtServiceTest` covering the deployed profile's refusal to start with the development JWT secret. 16/16 passing at the last run.
+
+Also verified by hand against real MySQL 8 (2026-09-19): booting against an **empty** database runs `V1__init.sql` via Flyway and passes Hibernate's schema validation; booting against a database that already had Hibernate-created tables baselines without re-running V1 and leaves the data untouched (row counts compared before/after).
 
 | # | SPEC.md scenario | Test | Verified |
 |---|---|---|---|
@@ -27,13 +29,14 @@ cd backend
 ```
 Last run in this repository's history: 13/13 passing (see the commit that added the backend for the exact console output).
 
-## Android — not run, because there's no Android SDK in the environment this was built in
+## Android — builds and runs; scenarios not yet walked end-to-end
 
-The Android module (`android/`) has full source for every mandatory screen and flow, and has been checked for structural soundness (every Java file brace-balanced, every XML file well-formed, every `R.id`/`R.layout` reference and every manifest-declared component resolving to a real definition — see the commit history for the exact grep-based checks run). It has **not** been compiled with the real Android Gradle Plugin, run on an emulator, or exercised by a human tapping through it. Before trusting it:
+The Android module (`android/`) compiles with the real Android Gradle Plugin (`assembleDebug`, verified 2026-09-20 after the switch from Google Maps SDK to osmdroid) and has been launched in the emulator against the local backend: registration/login and the Trusted Circle → add-contact flow were exercised by hand (that's how the FAB-overlap bug in `MainActivity` was found and fixed), plus, after the SheGuard redesign (2026-09-21), the Home, Circle, dark-mode Home and Active Trip screens were captured on the emulator with real backend data (screenshots reviewed), and the New Trip map was driven via `adb` on a Pixel 6 emulator: OpenStreetMap tiles render with attribution, a tap places the destination marker and zooms in, and zoom-15 tiles load (screenshots reviewed). Trip creation end-to-end, geofence arrival, SOS, fake call and the watcher views (including the watcher's map) have **not** yet been tapped through by a human on this build. Before trusting it:
 
-1. Open in Android Studio, let Gradle sync, fix whatever AGP/lint flags that this environment couldn't catch.
-2. Manually walk scenarios 1, 2, 4, 6, 9 (client side) end-to-end against a running backend.
+1. Replace the placeholder `google-services.json` with a real one so FCM can actually register a token (without it, push scenarios can only be observed in the backend log).
+2. Manually walk scenarios 1, 2, 4, 6, 9 (client side) end-to-end against a running backend, on an emulator image with Google Play services.
 3. Scenario 1 specifically needs a real or simulated location change crossing the geofence boundary (Android Studio's emulator location controls, or a GPX route, can simulate this without leaving your desk).
+4. Check the two map screens load OpenStreetMap tiles (they need internet; the emulator has it by default).
 
 ## ESP32 — not run, because there's no ESP32 hardware in the environment this was built in
 

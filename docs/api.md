@@ -1,6 +1,6 @@
 # API reference
 
-Base URL: `http://localhost:8080/` locally, the Cloud Run URL in production (see [deployment.md](deployment.md)). Interactive docs are also served at `/swagger-ui.html` (springdoc-openapi) once the backend is running.
+Base URL: `http://localhost:8080/` locally, `https://<label>.<region>.cloudapp.azure.com/` when deployed (see [deployment.md](deployment.md)). Interactive docs are also served at `/swagger-ui.html` (springdoc-openapi) once the backend is running.
 
 Every endpoint except `POST /api/auth/register` and `POST /api/auth/login` requires `Authorization: Bearer <jwt>`. Missing/invalid tokens get `403`; requests for a resource you don't own or watch get `403` (never a `404` that would leak existence, never someone else's data).
 

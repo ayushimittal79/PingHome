@@ -1,77 +1,136 @@
-# Deployment (backend → Cloud Run + Cloud SQL)
+# Deployment (backend → Azure VM + Azure Database for MySQL)
 
-None of this has been run against a real GCP project by whoever/whatever wrote this doc — these are the exact commands to run, not a report of a completed deployment. Follow [cloud-services.md](cloud-services.md) first for account/API setup context.
+The backend runs as a plain jar under systemd on a small Azure VM, behind Caddy for HTTPS, with
+Azure Database for MySQL as the database and Application Insights for telemetry. Everything is
+scripted under `deploy/azure/` and lives in one resource group, so teardown is one command.
 
-## 1. Create the Cloud SQL instance
+> **Status:** the scripts were written against the Azure CLI reference and pass `bash -n`, but
+> have **not yet been run against a real Azure subscription** (none existed when they were
+> written). The first run is the test. Everything after step 3 below is what to do if it works,
+> and what to check if it doesn't.
 
-```bash
-gcloud sql instances create pinghome-db \
-  --database-version=MYSQL_8_0 \
-  --tier=db-f1-micro \
-  --region=us-central1 \
-  --root-password=<choose-a-strong-password>
+Why a VM rather than a serverless/container platform: `EscalationScheduler` is an in-process
+`@Scheduled` job. It only runs while the JVM is alive, so the backend needs a host that is
+always on - not one that scales to zero or sleeps on idle. The free-account B1s VM is exactly
+that. See [cloud-services.md](cloud-services.md) for the cost/free-tier picture.
 
-gcloud sql databases create pinghome --instance=pinghome-db
+## 0. Prerequisites (your machine)
 
-gcloud sql users create pinghome \
-  --instance=pinghome-db \
-  --password=<choose-a-strong-password>
-```
+- Azure CLI (`az`), logged in: `az login`. Use a **personal** Microsoft account, never a
+  university one - see [cloud-services.md](cloud-services.md#account-rules).
+- Git Bash (Windows) or any bash; `ssh`, `scp`, `curl`, `openssl` on the PATH (Git Bash has all of them).
+- JDK 21 (the deploy script builds the jar locally).
+- `backend/firebase-service-account.json` - your Firebase service-account key (gitignored). Without
+  it the backend still runs; FCM just stays in log-only mode.
 
-Note the instance connection name (`gcloud sql instances describe pinghome-db --format='value(connectionName)'`) — you'll need it for Cloud Run's Cloud SQL connector.
-
-## 2. Build and push the backend image
-
-```bash
-cd backend
-gcloud builds submit --tag gcr.io/<PROJECT_ID>/pinghome-backend
-```
-
-(Or build locally with `docker build -t gcr.io/<PROJECT_ID>/pinghome-backend . && docker push ...` if you'd rather not use Cloud Build.)
-
-## 3. Deploy to Cloud Run
+## 1. Provision (once)
 
 ```bash
-gcloud run deploy pinghome-backend \
-  --image gcr.io/<PROJECT_ID>/pinghome-backend \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --min-instances=0 \
-  --max-instances=3 \
-  --add-cloudsql-instances=<PROJECT_ID>:us-central1:pinghome-db \
-  --set-env-vars="SPRING_PROFILES_ACTIVE=cloud" \
-  --set-env-vars="DB_URL=jdbc:mysql:///pinghome?cloudSqlInstance=<PROJECT_ID>:us-central1:pinghome-db&socketFactory=com.google.cloud.sql.mysql.SocketFactory&useSSL=false" \
-  --set-env-vars="DB_USERNAME=pinghome" \
-  --set-secrets="DB_PASSWORD=pinghome-db-password:latest" \
-  --set-secrets="PINGHOME_JWT_SECRET=pinghome-jwt-secret:latest" \
-  --set-secrets="PINGHOME_FIREBASE_CREDENTIALS_JSON=pinghome-firebase-creds:latest"
+export PINGHOME_MYSQL_PASSWORD="$(openssl rand -base64 24)"   # keep this - you'll need it in step 2
+./deploy/azure/provision.sh
 ```
 
-`--allow-unauthenticated` is required here: the JWT layer is PingHome's own auth, and Cloud Run's separate IAM-based auth would block the Android app's requests before they ever reach Spring Security. Application-level auth is what actually protects the API.
+Creates, in resource group `pinghome-rg` (region `centralindia` by default, override with
+`PINGHOME_LOCATION`):
 
-The Cloud SQL JDBC URL above uses the [Cloud SQL Socket Factory](https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory), which needs the `com.google.cloud.sql:mysql-socket-factory-connector-j-8` dependency added to `pom.xml` if you deploy this way instead of a public IP + SSL connection — pick whichever connection method matches your Cloud SQL instance's configuration and adjust `DB_URL` accordingly.
+| Resource | Size | Free-account coverage |
+|---|---|---|
+| VM `pinghome-vm` | Standard_B1s, Ubuntu 24.04, 30 GB disk | 750 h/month for 12 months |
+| MySQL flexible server | Burstable Standard_B1ms, 32 GB, MySQL 8.0 | 750 h/month + 32 GB for 12 months |
+| Application Insights + Log Analytics workspace | - | 5 GB/month ingestion always free |
+| Public IP (Standard) | - | **not** free: roughly $3-4/month after the first 30 days |
+| Budget alert `pinghome-budget` | $5/month, email | - |
 
-**Secrets**: store `DB_PASSWORD`, `PINGHOME_JWT_SECRET`, and the Firebase service-account JSON in [Secret Manager](https://cloud.google.com/secret-manager) rather than as plain `--set-env-vars` — the command above already does this via `--set-secrets`. Create them first:
+It prints the VM hostname (`<label>.centralindia.cloudapp.azure.com`), MySQL host, and the
+Application Insights connection string. The MySQL firewall is opened only for the VM's IP.
+
+If `az vm create` fails with a capacity/SKU error for the region, re-run with
+`PINGHOME_LOCATION=southindia` (or any region listed as available for both B1s VMs and MySQL
+flexible server).
+
+## 2. Configure
 
 ```bash
-echo -n "<db-password>" | gcloud secrets create pinghome-db-password --data-file=-
-openssl rand -base64 48 | gcloud secrets create pinghome-jwt-secret --data-file=-
-gcloud secrets create pinghome-firebase-creds --data-file=path/to/service-account.json
+cp deploy/azure/pinghome.env.example deploy/azure/pinghome.env
 ```
+
+Fill in `pinghome.env` from the provision output: `PINGHOME_DOMAIN`, `DB_URL` (keep
+`sslMode=REQUIRED` - Azure MySQL enforces TLS), `DB_PASSWORD`, `APPLICATIONINSIGHTS_CONNECTION_STRING`,
+and a fresh `PINGHOME_JWT_SECRET` (`openssl rand -base64 48`). The `cloud` profile refuses to
+start if the JWT secret is left at the development default. The file is gitignored.
+
+## 3. Bootstrap the VM + first deploy
+
+```bash
+./deploy/azure/setup-vm.sh pinghome@<label>.centralindia.cloudapp.azure.com   # once
+./deploy/azure/deploy.sh   pinghome@<label>.centralindia.cloudapp.azure.com   # every code change
+```
+
+`setup-vm.sh` installs Java 21, Caddy, the systemd unit, the Application Insights agent and a
+1 GB swap file. `deploy.sh` builds the jar, uploads it, restarts the service and polls
+`https://<host>/actuator/health` until it reports `UP`. On the first boot, Flyway creates the
+schema in the empty Azure database automatically (see [database.md](database.md)).
+
+Caddy obtains the Let's Encrypt certificate on the first HTTPS request; if the first health
+check fails with a TLS error, wait a minute and retry - the certificate issuance can take that
+long on first boot. If it keeps failing: `ssh ... 'sudo journalctl -u caddy -n 50'`.
 
 ## 4. Point the Android app at it
 
-Set `PINGHOME_API_BASE_URL` (the release build config field in `android/app/build.gradle`) to the Cloud Run service URL printed after deploy (`https://pinghome-backend-xxxxx-uc.a.run.app/`).
-
-## 5. Tear down after grading/demo, to stop all billing
+Build the release APK against the real HTTPS origin (the debug build keeps pointing at the
+emulator loopback):
 
 ```bash
-gcloud run services delete pinghome-backend --region us-central1
-gcloud sql instances delete pinghome-db
-gcloud secrets delete pinghome-db-password
-gcloud secrets delete pinghome-jwt-secret
-gcloud secrets delete pinghome-firebase-creds
+cd android
+./gradlew assembleRelease -PPINGHOME_API_BASE_URL=https://<label>.centralindia.cloudapp.azure.com/
 ```
 
-See [cloud-services.md](cloud-services.md) for the per-service cost/free-tier breakdown and lighter-weight "pause instead of delete" options if you'll need the environment again soon.
+Without a `PINGHOME_KEYSTORE_FILE` property the release APK is signed with the debug key,
+which is fine for sideloading onto demo devices. For a real keystore see [setup.md](setup.md).
+
+## 5. Verify
+
+- `curl https://<host>/actuator/health` → `{"status":"UP"}`
+- `curl -X POST https://<host>/api/auth/login -H 'Content-Type: application/json' -d '{"email":"x","password":"y"}'` → HTTP 401 with a JSON error body (proves routing + TLS)
+- Azure portal → Application Insights → Live Metrics shows the instance; the `EscalationScheduler`
+  log lines appear under Logs → traces during an active trip past its grace period.
+- Run the manual scenarios in [testing.md](testing.md) against the deployed URL.
+
+## 6. Day 30: the mandatory upgrade (read this before signing up)
+
+The Azure free account has a **spending limit for the first 30 days only**. Microsoft's terms:
+*"Within 30 days of sign-up or upon exhaustion of the credits (whichever occurs first), you must
+upgrade to a pay-as-you-go subscription by removing the spending limit."* If you don't, the
+subscription - including the "free" VM and database - is disabled.
+
+- **If the demo is within 30 days of signup:** do nothing. Tear down afterwards (step 7).
+- **If it's later:** around day 28 Azure emails you. In the portal: Subscriptions → your
+  subscription → the "Upgrade" banner → choose pay-as-you-go, confirm the card. The 12-month free
+  quotas keep applying; what you'll actually be billed is the public IP (≈$3-4/month) and anything
+  outside the free sizes. Keep the `pinghome-budget` alert (or set one in Cost Management →
+  Budgets) so an accidental overage emails you.
+
+Do **not** change VM or database sizes after upgrading - the free quotas only cover the sizes
+in the table above.
+
+## 7. Teardown after the demo (stops all billing)
+
+```bash
+az group delete --name pinghome-rg --yes
+```
+
+Everything PingHome created lives in that one group. Optionally also cancel the subscription
+in the portal (Subscriptions → Cancel) so nothing can ever be created on it again. Then delete
+`deploy/azure/pinghome.env` locally.
+
+## Redeploy / troubleshoot
+
+| Symptom | Do |
+|---|---|
+| Code change | `./deploy/azure/deploy.sh pinghome@<host>` |
+| Backend not healthy | `ssh pinghome@<host> 'sudo journalctl -u pinghome -n 100 --no-pager'` |
+| `PINGHOME_JWT_SECRET` error in logs | fill it in `pinghome.env`, re-run `deploy.sh` |
+| MySQL connection refused | VM IP changed (VM was deallocated and restarted): `az mysql flexible-server firewall-rule create --resource-group pinghome-rg --name <mysql-name> --rule-name vm --start-ip-address <new-ip> --end-ip-address <new-ip>` |
+| HTTPS certificate error | `ssh ... 'sudo systemctl restart caddy'`, wait 60 s |
+| VM rebuilt from scratch | `provision.sh` (create-if-missing, safe to re-run) → `setup-vm.sh` → `deploy.sh` |
+

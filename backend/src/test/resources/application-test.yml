@@ -12,6 +12,10 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
+  # Tests use disposable in-memory H2, not a migrated MySQL schema - Hibernate creates/drops it
+  # per run same as before Flyway was introduced for the real (local MySQL / Cloud SQL) path.
+  flyway:
+    enabled: false
 
 pinghome:
   jwt:

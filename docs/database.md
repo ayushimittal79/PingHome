@@ -1,6 +1,6 @@
 # Database
 
-MySQL, accessed through Spring Data JPA/Hibernate. `spring.jpa.hibernate.ddl-auto=update` in local/demo profiles (Hibernate creates/updates tables from the `@Entity` classes on boot — no migration tool for this project, see [Limitations](#limitations)); `application-cloud.yml` switches this to `validate` so a deployed instance never silently alters schema.
+MySQL, accessed through Spring Data JPA/Hibernate. Schema is owned by [Flyway](https://flywaydb.org/) migrations in `backend/src/main/resources/db/migration` (`V1__init.sql` is the full baseline schema, matching the tables below exactly); `spring.jpa.hibernate.ddl-auto=validate` in every profile only checks the migrated schema against the `@Entity` classes and never changes it. This runs identically against local MySQL and Cloud SQL — a brand-new database gets its schema created automatically on first boot, and `baseline-on-migrate` (see `application.yml`) safely adopts a database that already has Hibernate-created tables from before this project used Flyway, without re-running `V1`.
 
 ## Tables
 
@@ -89,4 +89,4 @@ Deleted wholesale (`DELETE ... WHERE trip_id = ?`) when a trip completes or is c
 
 ## Limitations
 
-No Flyway/Liquibase migration tooling — `ddl-auto` handles schema creation, which is appropriate for a coursework project's iteration speed but is explicitly called out here as something a production system would replace with versioned migrations before a real deployment (also noted inline in `application.yml`).
+Only one migration exists so far (`V1__init.sql`, the baseline schema below). Any future schema change should be added as a new versioned migration (`V2__...sql`, etc.) rather than editing `V1` or relying on `ddl-auto` again — Flyway rejects a checksum-mismatched edit to an already-applied migration.

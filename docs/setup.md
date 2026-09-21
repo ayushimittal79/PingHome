@@ -5,6 +5,7 @@
 - JDK 21
 - MySQL 8.x running locally (or point `DB_URL` at any reachable MySQL instance)
 - Android Studio (Koala/2024.1+) with an SDK for API 34 and an emulator or device on API 26+
+- For deployment: Azure CLI (`az`) — see [deployment.md](deployment.md)
 - PlatformIO (`pip install platformio`) or the PlatformIO IDE extension, for the ESP32 firmware
 - A physical ESP32 dev board + push button for the wearable (mandatory per SPEC.md — there is no way to fully exercise the SOS-over-BLE flow without real hardware)
 
@@ -16,7 +17,15 @@ cp .env.example .env   # then edit values, or export them in your shell / IDE ru
 ./mvnw spring-boot:run
 ```
 
-Minimum local setup: a MySQL database named `pinghome` (`CREATE DATABASE pinghome;`) reachable with the credentials in `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`. Everything else (Firebase, Twilio, Maps) is optional locally — the backend boots and is fully testable without any of them configured (see [cloud-services.md](cloud-services.md) for what happens when they're absent).
+Minimum local setup: a MySQL database named `pinghome` with a user that can use it, e.g.
+
+```sql
+CREATE DATABASE pinghome;
+CREATE USER 'pinghome'@'localhost' IDENTIFIED BY 'pinghome';
+GRANT ALL PRIVILEGES ON pinghome.* TO 'pinghome'@'localhost';
+```
+
+(those are the defaults in `application.yml`; override with `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`). Flyway creates the tables on first boot. Everything else (Firebase, Twilio) is optional locally — the backend boots and is fully testable without any of them configured (see [cloud-services.md](cloud-services.md) for what happens when they're absent).
 
 Run the test suite (uses an in-memory H2 database, no MySQL needed):
 
@@ -33,12 +42,12 @@ SPRING_PROFILES_ACTIVE=demo DEMO_MODE=true ./mvnw spring-boot:run
 ## Android
 
 1. Open `android/` in Android Studio and let it sync (first sync will download the Gradle wrapper distribution and dependencies — needs internet).
-2. Replace `android/app/google-services.json` with your own from the Firebase console (see [cloud-services.md](cloud-services.md)) — the checked-in file is a non-functional placeholder.
-3. Supply a Google Maps API key: either pass `-PMAPS_API_KEY=...` to Gradle, or add a `gradle.properties` entry (a personal, non-committed one under `~/.gradle/gradle.properties`, or `android/local.properties` wired into `build.gradle`) — do not hard-code it into `build.gradle` itself.
-4. Point the app at your backend: `PINGHOME_API_BASE_URL_DEBUG` Gradle property (defaults to `http://10.0.2.2:8080/`, which reaches a backend running on your host machine from the Android emulator).
-5. Run on an emulator or device with Google Play services (required for Maps, FCM, Location/Geofencing).
+2. Replace `android/app/google-services.json` with your own from the Firebase console (see [cloud-services.md](cloud-services.md)) — the checked-in file is a non-functional placeholder. Nothing else needs a key: the map uses OpenStreetMap tiles via `osmdroid`.
+3. Point the app at your backend: `PINGHOME_API_BASE_URL_DEBUG` Gradle property (defaults to `http://10.0.2.2:8080/`, which reaches a backend running on your host machine from the Android emulator). Release builds take `PINGHOME_API_BASE_URL` — see [deployment.md](deployment.md).
+4. Run on an emulator or device image **with Google Play services** (required for FCM and for Location/Geofencing).
+5. Release signing (optional, for a distributable APK): put a keystore somewhere outside the repo and pass `-PPINGHOME_KEYSTORE_FILE=... -PPINGHOME_KEYSTORE_PASSWORD=... -PPINGHOME_KEY_ALIAS=... -PPINGHOME_KEY_PASSWORD=...` (or set them in `~/.gradle/gradle.properties`, never in the repo). Without them `assembleRelease` signs with the debug key, which is enough for sideloading onto demo devices.
 
-The app cannot be built/run inside the sandbox this codebase was originally written in — no Android SDK is available there. It has been checked for structural correctness (balanced braces, well-formed XML, every `R.id`/`R.layout`/manifest-component reference resolving to a real definition) but **not compiled with the real Android Gradle Plugin**. Build it in Android Studio and fix anything AGP flags before relying on it — see [testing.md](testing.md) for exactly what has and hasn't been verified.
+The app builds with the real Android Gradle Plugin (`./gradlew assembleDebug`) and runs in the emulator; see [testing.md](testing.md) for exactly which flows have and haven't been exercised by hand.
 
 ## Wearable (ESP32)
 

@@ -1,6 +1,7 @@
-# Multi-stage build so the deployed image only carries a JRE + the built jar, not the whole
-# Maven toolchain. Built and pushed to Artifact Registry / deployed on Cloud Run - see
-# docs/deployment.md for the exact gcloud commands.
+# Multi-stage build so the image only carries a JRE + the built jar, not the whole Maven
+# toolchain. Works on any container host. The current Azure deployment (docs/deployment.md)
+# runs the plain jar under systemd on a VM instead, so this image is optional there - kept so
+# the backend can move to a container platform without changes.
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY .mvn/ .mvn/
@@ -14,6 +15,6 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/pinghome-backend.jar app.jar
 
-# Cloud Run injects PORT; application.yml already reads it via ${PORT:8080}.
+# Container platforms inject PORT; application.yml already reads it via ${PORT:8080}.
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

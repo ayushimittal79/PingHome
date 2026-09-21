@@ -25,7 +25,7 @@ PingHome watches over a solo commuter during a single planned trip and gets help
 - **Privacy**: no tracking before a trip; location used only for geofencing + permitted watcher visibility during an `ACTIVE`/`ESCALATED` trip; stops immediately on completion; historical location purged on completion.
 - **Security**: BCrypt, JWT, ownership + watcher-permission authorization on every trip/location endpoint, no IDOR, no plaintext secrets, safe error responses.
 - **Reliability**: graceful handling of poor connectivity, idempotent safety-critical operations, SOS treated as highest priority — without ever claiming guaranteed delivery under all network conditions.
-- **Cloud**: at least three genuinely integrated cloud services (Cloud Run, Cloud SQL, FCM are the primary three; Maps Platform and optional Twilio SMS round it out) — see [cloud-services.md](cloud-services.md).
+- **Cloud**: at least three genuinely integrated cloud services (Azure Virtual Machine, Azure Database for MySQL and Azure Application Insights host and observe the backend; Firebase Cloud Messaging delivers push; optional Twilio SMS rounds it out) — see [cloud-services.md](cloud-services.md), including why the originally planned Google Cloud hosting and Google Maps were replaced.
 - **UI**: calm, trustworthy, modern — navy/charcoal + off-white, green=safe, amber=warning, red reserved for SOS. No generic cybersecurity imagery, no excessive animation.
 
 ## Explicitly out of scope

@@ -47,6 +47,19 @@ At least **three** cloud services must be genuinely integrated (not just mention
 
 Prioritize free tiers/trial credits; avoid unnecessary paid services. `docs/cloud-services.md` must eventually document, for each service used: purpose, integration points, configuration, credentials/API key handling, deployment steps, free-tier/trial limits, possible charges, and how to disable/delete paid resources after a demo.
 
+**Infrastructure decision, 2026-09-20 (supersedes the preferred stack above for hosting and maps):**
+Google Cloud billing could not be enabled on any personal account (Google Payments error
+`OR_BACR2_59` after repeated attempts), and university-managed Google accounts must not be
+used. Cloud Run, Cloud SQL and Google Maps Platform all require billing, so the project now uses
+**Azure** for hosting — Azure Virtual Machine (B1s) + Azure Database for MySQL (flexible server)
++ Azure Application Insights, all within the Azure free account's 12-month allowance — and
+**OpenStreetMap via `osmdroid`** for map display (no key, no billing). Firebase Cloud Messaging
+is unchanged (it needs no billing). Android location and geofencing were always on-device
+Google Play Services and are unaffected. The backend code has no cloud-specific dependency;
+only deployment configuration (`deploy/azure/`) changed. Rationale, costs and the day-30
+upgrade rule are in `docs/cloud-services.md` and `docs/deployment.md`. The ≥3 cloud services
+requirement is met by the three Azure services plus FCM.
+
 ## Architecture
 
 ```

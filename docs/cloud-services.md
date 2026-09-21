@@ -1,85 +1,139 @@
 # Cloud services
 
-PingHome genuinely integrates three cloud services in code (not just in documentation), plus two more that round out the product. None of these accounts have been provisioned by the assistant that wrote this code — you'll need to create them yourself following the steps below before anything cloud-hosted actually runs.
+PingHome integrates four cloud services in code (not just in documentation): three from
+Microsoft Azure, which hosts the backend, plus Firebase Cloud Messaging from Google for push
+notifications. An optional fifth (Twilio SMS) is off by default.
 
-## 1. Google Cloud Run — hosts the backend
+**Why Azure and not Google Cloud, which the original plan named:** Google Cloud's managed
+database (Cloud SQL) has no free tier, and enabling billing on a Google Cloud account - which
+Cloud SQL, Cloud Run *and* Google Maps all require - repeatedly failed for this project's
+personal accounts (Google Payments error `OR_BACR2_59`). University-managed Google accounts were
+deliberately not used (see [Account rules](#account-rules)). Azure's free account covers a
+managed MySQL server and an always-on VM, which is what the backend's `@Scheduled` escalation
+job needs. Nothing in the backend code was tied to Google Cloud: the only change was
+deployment configuration. See [deployment.md](deployment.md).
 
-**Purpose:** runs the Spring Boot backend as a container, autoscaling to zero when idle (important for keeping an academic project's bill at $0 between demos).
+## Account rules
 
-**Integration:** `backend/Dockerfile` builds a self-contained JRE image; `application.yml` reads `PORT` (Cloud Run injects this) and every secret/connection value from environment variables, so the same jar runs unmodified locally and on Cloud Run.
+- All cloud resources belong to a **personal** account. Nothing is deployed under the
+  university's Google or Microsoft organisation - that would put project infrastructure on
+  university-owned tenancy without authorisation.
+- The Azure free account requires a Visa/Mastercard credit or non-prepaid debit card (a
+  refundable US$1 verification hold), a phone number and a personal Microsoft account. It does
+  not set up an autopay mandate.
 
-**Setup:** see [deployment.md](deployment.md) for the exact `gcloud run deploy` command.
+## 1. Azure Virtual Machine — hosts the backend
 
-**Free tier:** Cloud Run's always-free tier includes 2 million requests/month and 360,000 GB-seconds of memory — a coursework demo won't come close. Configure `min-instances=0` (the deploy command in deployment.md already does) so it scales to zero and costs nothing while not in use.
+**Purpose:** runs the Spring Boot jar as a systemd service, with Caddy in front for HTTPS.
 
-**Turning it off after a demo:** `gcloud run services delete pinghome-backend --region <region>`.
+**Integration:** `deploy/azure/provision.sh` creates it; `deploy/azure/setup-vm.sh` installs
+Java 21, Caddy and the `deploy/azure/pinghome.service` unit; `deploy/azure/deploy.sh` ships the
+jar. The app reads `PORT` and all secrets from `/etc/pinghome/pinghome.env`. The backend code
+has no Azure dependency - the same jar runs locally with `./mvnw spring-boot:run`.
 
-## 2. Google Cloud SQL for MySQL — the deployed database
+**Free tier:** 750 hours/month of a Standard_B1s VM (1 vCPU, 1 GB RAM) for 12 months - enough
+to run continuously. The Standard public IP attached to it is **not** free (≈ US$3-4/month)
+once the account is upgraded after its first 30 days.
 
-**Purpose:** the persistent store for users/trips/contacts/watchers/locations/alerts/wearable_devices described in [database.md](database.md).
+**Why always-on matters:** `EscalationScheduler` polls active trips on a timer inside the JVM.
+Serverless hosts that scale to zero (Cloud Run at `min-instances=0`, Render's free tier)
+would pause it between requests - a silent failure for a safety product.
 
-**Integration:** `application-cloud.yml` + `application.yml`'s `DB_URL`/`DB_USERNAME`/`DB_PASSWORD` env vars point Spring Data JPA at it exactly like local MySQL — no code difference.
+**Turning it off:** `az group delete --name pinghome-rg --yes` deletes the VM with everything else.
 
-**Setup:** see [deployment.md](deployment.md).
+## 2. Azure Database for MySQL (flexible server) — the deployed database
 
-**Free tier / cost:** Cloud SQL has **no** always-free tier (unlike Cloud Run) — it bills for the instance whenever it exists, even idle, typically a few dollars/day for the smallest tier (`db-f1-micro`). Google Cloud's free trial credit ($300, 90 days on a new account as of this writing — verify current terms at cloud.google.com/free) comfortably covers a semester's development if you stop the instance between sessions.
+**Purpose:** the persistent store for users/trips/contacts/watchers/locations/alerts/wearable
+devices described in [database.md](database.md).
 
-**Cost control:**
-- Use the smallest tier (`db-f1-micro`, 10GB SSD).
-- `gcloud sql instances patch pinghome-db --activation-policy=NEVER` stops billing for compute between sessions (storage still bills a small amount).
-- **Delete entirely after the project is graded:** `gcloud sql instances delete pinghome-db`.
+**Integration:** the same `DB_URL`/`DB_USERNAME`/`DB_PASSWORD` environment variables as local
+MySQL, with `sslMode=REQUIRED` because Azure enforces TLS. Flyway creates the schema on first
+boot; no code or migration changes were needed to move from local MySQL 8 to Azure MySQL 8.
 
-## 3. Firebase Cloud Messaging — primary push notifications
+**Free tier:** 750 hours/month of a Burstable Standard_B1ms server plus 32 GB storage and 32 GB
+backup for 12 months. The provisioning script uses exactly those sizes.
 
-**Purpose:** the primary notification channel for safety nudges, escalation alerts, watcher alerts, and trip-completion pushes, per SPEC.md.
+**Cost control:** don't scale the tier or storage. The MySQL firewall only admits the VM's IP.
 
-**Integration:** `backend/.../notification/FcmService.java` wraps the Firebase Admin SDK; `android/.../notification/PingHomeFirebaseMessagingService.java` receives them. The backend reads a service-account credential from `PINGHOME_FIREBASE_CREDENTIALS_JSON` (or `_PATH`) — **without it configured, `FcmService` logs what it would have sent and returns `false` instead of throwing**, so the rest of the backend stays fully testable without live Firebase credentials (see the 13 passing backend tests, none of which need a real Firebase project).
+**Turning it off:** deleted with the resource group.
+
+## 3. Azure Application Insights — telemetry and logs
+
+**Purpose:** request/exception telemetry and the backend's logs (including the escalation
+scheduler's `Sent safety nudge` / `Escalated trip` lines) in the Azure portal, without SSH.
+
+**Integration:** the Application Insights Java agent (`-javaagent` in `pinghome.service`) reads
+`APPLICATIONINSIGHTS_CONNECTION_STRING` from the env file. It instruments Spring MVC, JDBC and
+logging automatically; the application code is unchanged.
+
+**Free tier:** the first 5 GB/month of ingestion into the Log Analytics workspace is free with
+no expiry; a demo backend produces a few megabytes.
+
+**Turning it off:** deleted with the resource group.
+
+## 4. Firebase Cloud Messaging — primary push notifications
+
+**Purpose:** safety nudges, escalation alerts, watcher alerts and trip-completion pushes, per
+SPEC.md. Firebase is a Google Cloud service; it is the one piece of the original Google plan
+that survived, because it needs no billing account.
+
+**Integration:** `backend/.../notification/FcmService.java` wraps the Firebase Admin SDK using a
+service-account JSON (`PINGHOME_FIREBASE_CREDENTIALS_PATH` on the VM, `_JSON` or `_PATH`
+locally). Without credentials it logs what it would have sent and returns `false` instead of
+throwing, so the backend is fully testable without a Firebase project. The Android side is
+`android/.../notification/PingHomeFirebaseMessagingService.java` plus `google-services.json`.
 
 **Setup:**
-1. Create a Firebase project at console.firebase.google.com (Firebase projects wrap a normal GCP project, so this can be the same project as Cloud Run/Cloud SQL).
-2. Add an Android app with package name `com.pinghome.app`; download `google-services.json` and replace the placeholder at `android/app/google-services.json`.
-3. Project settings → Service accounts → Generate new private key → paste the JSON contents into `PINGHOME_FIREBASE_CREDENTIALS_JSON` (or save the file and point `PINGHOME_FIREBASE_CREDENTIALS_PATH` at it) on the backend.
+1. console.firebase.google.com → create a project on a personal Google account (free "Spark"
+   plan - do not add a billing account, it isn't needed).
+2. Add an Android app with package `com.pinghome.app`; download `google-services.json` and
+   replace the placeholder at `android/app/google-services.json`.
+3. Project settings → Service accounts → Generate new private key → save as
+   `backend/firebase-service-account.json` (gitignored). `deploy.sh` uploads it to the VM.
 
-**Free tier:** FCM is free, unlimited, no billing account required for messaging itself.
+**Free tier:** FCM is free and unlimited. Delivery is best-effort, not guaranteed - see
+[testing.md](testing.md) and the reliability notes in SPEC.md.
 
-**Delivery is best-effort**, not guaranteed — see [testing.md](testing.md) and the reliability notes in SPEC.md. Nothing in this codebase claims otherwise.
+## Maps — OpenStreetMap via osmdroid (not a cloud account)
 
-## 4. Google Maps Platform — maps & destination picking
+The destination picker (`CreateTripActivity`) and the watcher's last-known-location map
+(`WatcherTripDetailActivity`) render OpenStreetMap tiles with the `osmdroid` library. This
+replaced the Google Maps SDK named in the original plan because Google Maps requires a
+billing-enabled Google Cloud project (see the top of this file). It needs no API key and no
+account. Location itself - GPS via Fused Location Provider and the Android Geofencing API - is
+Google Play Services on the device and was never affected; it needs no key or billing either.
 
-**Purpose:** the destination-picker map in trip creation and the last-known-location map in the watcher trip detail screen (`android/.../ui/trip/CreateTripActivity.java`, `.../ui/watcher/WatcherTripDetailActivity.java`).
-
-**Integration:** Android-only — the Maps SDK for Android reads an API key from `android/app/build.gradle`'s `MAPS_API_KEY` manifest placeholder.
-
-**Setup:**
-1. In the same GCP project, enable "Maps SDK for Android" (APIs & Services → Library).
-2. Create an API key (APIs & Services → Credentials), restrict it to Android apps with package `com.pinghome.app` and your debug/release SHA-1 fingerprints.
-3. Set it via `-PMAPS_API_KEY=...` on the Gradle command line, or add `MAPS_API_KEY=...` to a local (never-committed) `android/local.properties`-style file and wire it into `build.gradle` — see [setup.md](setup.md).
-
-**Free tier:** Google Maps Platform gives $200/month of free usage credit, which is thousands of map loads — a demo won't come close to a charge. Keep the key restricted to your app so it can't be abused if it ever leaks.
-
-**Turning it off:** delete the API key, or disable the Maps SDK for Android API, in Cloud Console.
+Limitation worth stating honestly: the public OSM tile servers are volunteer-run with a
+[usage policy](https://operations.osmfoundation.org/policies/tiles/). The app identifies itself
+with its package name as required, and demo-scale traffic is well within policy; a real product
+would use a commercial tile provider.
 
 ## 5. Twilio — optional SMS fallback (off by default)
 
-**Purpose:** an optional critical-alert SMS fallback for escalation/SOS, in case a watcher's FCM push doesn't land (no connectivity, app uninstalled, etc).
+**Purpose:** an optional critical-alert SMS fallback for escalation/SOS if a watcher's FCM push
+doesn't land.
 
-**Integration:** `backend/.../notification/SmsService.java`, gated by `pinghome.sms.enabled` (defaults to **`false`**). `NotificationDispatcher` only calls it for `critical` sends, and only when the FCM push already failed. It is never triggered during ordinary development/demo runs unless you explicitly opt in.
+**Integration:** `backend/.../notification/SmsService.java`, gated by `pinghome.sms.enabled`
+(default `false`). `NotificationDispatcher` only calls it for critical sends after an FCM
+failure. Never triggered unless you explicitly opt in.
 
-**Setup (only if you want this feature live):**
-1. Create a Twilio trial account (free, no card required for the trial); trial accounts can only SMS **verified** numbers, which is fine for a demo where you control the watcher's phone.
-2. Grab the Account SID, Auth Token, and your Twilio trial phone number from the console.
-3. Set `PINGHOME_SMS_ENABLED=true`, `PINGHOME_TWILIO_ACCOUNT_SID`, `PINGHOME_TWILIO_AUTH_TOKEN`, `PINGHOME_TWILIO_FROM_NUMBER`.
+**Setup (only if wanted):** Twilio trial account (no card; trial can only SMS verified numbers),
+then `PINGHOME_SMS_ENABLED=true` plus the SID/token/from-number variables.
 
-**Free tier / cost:** Twilio's trial includes a small free credit; SMS beyond that is billed per message (fractions of a cent to a few cents depending on destination). Leave `PINGHOME_SMS_ENABLED=false` (the default) unless you specifically want to demo the fallback path, to guarantee zero Twilio charges.
+**Cost:** trial credit, then per-message. Leave disabled for zero charges.
 
-**Turning it off:** set `PINGHOME_SMS_ENABLED=false` (or just don't set it — that's the default) and/or delete the Twilio account.
+## Summary
 
-## Summary table
+| Service | Provider | Required? | Free-tier state | Cost if left running |
+|---|---|---|---|---|
+| Virtual Machine (B1s) | Azure | Yes | 750 h/month, 12 months | $0 within quota, + ≈$3-4/month public IP after day 30 |
+| Database for MySQL (B1ms) | Azure | Yes | 750 h/month + 32 GB, 12 months | $0 within quota |
+| Application Insights | Azure | Yes (telemetry) | 5 GB/month, no expiry | $0 |
+| Firebase Cloud Messaging | Google | Yes (primary notifications) | free, unlimited | $0 |
+| Twilio | Twilio | No | disabled | $0 while disabled |
 
-| Service | Required? | Default state | Monthly cost if left running |
-|---|---|---|---|
-| Cloud Run | Yes (deployment) | scales to zero | $0 (always-free tier covers coursework usage) |
-| Cloud SQL | Yes (deployment) | must be stopped manually between uses | a few $/day if left running; $0 if stopped |
-| Firebase Cloud Messaging | Yes (primary notifications) | no-ops without credentials | $0 (free) |
-| Google Maps Platform | Yes (Android maps) | inert without a key | $0 within the $200/month credit for a demo's usage |
-| Twilio | No (optional fallback) | disabled | $0 while disabled |
+**The first 30 days of the Azure account have a hard spending limit** - nothing can be charged.
+After that the account must be upgraded to keep running (see
+[deployment.md §6](deployment.md#6-day-30-the-mandatory-upgrade-read-this-before-signing-up)),
+the free quotas continue, and a budget alert emails you about anything outside them. Tear down
+with one command when the demo is over ([deployment.md §7](deployment.md#7-teardown-after-the-demo-stops-all-billing)).

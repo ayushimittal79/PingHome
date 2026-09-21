@@ -1,0 +1,8 @@
+# Scripts and configs that run on Linux must keep LF endings regardless of the Windows checkout.
+*.sh            text eol=lf
+mvnw            text eol=lf
+Caddyfile       text eol=lf
+*.service       text eol=lf
+*.env.example   text eol=lf
+Dockerfile      text eol=lf
+*.sql           text eol=lf

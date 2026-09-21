@@ -24,6 +24,7 @@ wearable/**/.vscode/
 **/firebase-service-account*.json
 **/*.env
 .env
+deploy/azure/pinghome.env
 *.keystore
 *.jks
 
@@ -33,3 +34,6 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+
+# --- Design reference drops (e.g. the SheGuard frontend zip) ---
+*.zip

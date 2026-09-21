@@ -2,7 +2,7 @@
 
 A wearable + app safety companion that watches over solo commuters — automatically, quietly, and only when it matters.
 
-PingHome is an academic capstone project combining a native Android app, a cloud-hosted Spring Boot backend, MySQL, Firebase Cloud Messaging, Google Maps/location services, and a physical ESP32 BLE wearable with a real SOS button into one integrated safety product — not a set of disconnected demos.
+PingHome is an academic capstone project combining a native Android app, a cloud-hosted Spring Boot backend (Azure VM + Azure Database for MySQL + Application Insights), Firebase Cloud Messaging, on-device location/geofencing with OpenStreetMap for map display, and a physical ESP32 BLE wearable with a real SOS button into one integrated safety product — not a set of disconnected demos.
 
 ## What it does
 
@@ -17,10 +17,11 @@ A traveller starts a **trip**: a destination, an expected arrival time, a grace 
 ## Repository layout
 
 ```
-backend/    Spring Boot 3 / Java 21 REST API - the authoritative source of trip/escalation state
-android/    Native Android app (Java) - traveller + watcher UI, BLE, geofencing, FCM
-wearable/   ESP32 firmware (Arduino/PlatformIO) - the physical SOS button over BLE
-docs/       Requirements, architecture, database, API, setup, deployment, cloud services, testing
+backend/       Spring Boot 3 / Java 21 REST API - the authoritative source of trip/escalation state
+android/       Native Android app (Java) - traveller + watcher UI, BLE, geofencing, FCM
+wearable/      ESP32 firmware (Arduino/PlatformIO) - the physical SOS button over BLE
+deploy/azure/  Provisioning + deployment scripts for the Azure VM / MySQL / App Insights setup
+docs/          Requirements, architecture, database, API, setup, deployment, cloud services, testing
 ```
 
 ## Quick start
@@ -31,6 +32,7 @@ docs/       Requirements, architecture, database, API, setup, deployment, cloud 
 | Backend tests | `cd backend && ./mvnw test` | [docs/testing.md](docs/testing.md) |
 | Android | Open `android/` in Android Studio | [docs/setup.md](docs/setup.md) |
 | Wearable | `cd wearable/pinghome-sos && pio run -t upload` | [docs/wearable.md](docs/wearable.md) |
+| Deploy | `./deploy/azure/provision.sh`, then `deploy.sh` | [docs/deployment.md](docs/deployment.md) |
 
 ## Documentation
 
@@ -46,4 +48,4 @@ docs/       Requirements, architecture, database, API, setup, deployment, cloud 
 
 ## Status
 
-Implemented end-to-end: backend (built, unit/integration tested, 13 passing tests), Android app (full source for every mandatory screen/flow), ESP32 firmware (BLE SOS peripheral). Not yet done by a human: buying/flashing physical hardware, provisioning real Firebase/Google Cloud/Twilio accounts, and running the manual test matrix in [docs/testing.md](docs/testing.md) against real devices. See each doc's "limitations" section for specifics — nothing here claims to be verified that hasn't actually been run.
+Implemented end-to-end: backend (built, unit/integration tested, 16 passing tests, Flyway-managed schema), Android app (builds with AGP, runs in the emulator; every mandatory screen/flow present), ESP32 firmware (compiled BLE SOS peripheral), Azure deployment scripts (written, not yet run against a real subscription). Not yet done by a human: buying/flashing physical hardware, creating the Firebase project and Azure account, the first real deployment, and running the manual test matrix in [docs/testing.md](docs/testing.md) against real devices. See each doc's "limitations" section for specifics — nothing here claims to be verified that hasn't actually been run.

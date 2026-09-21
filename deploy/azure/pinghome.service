@@ -1,0 +1,24 @@
+[Unit]
+Description=PingHome backend (Spring Boot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pinghome
+Group=pinghome
+WorkingDirectory=/opt/pinghome
+EnvironmentFile=/etc/pinghome/pinghome.env
+# 1 GB VM: cap the heap so JVM + Caddy + OS fit without swapping under normal load.
+ExecStart=/usr/bin/java -Xmx384m -XX:+UseSerialGC \
+    -javaagent:/opt/pinghome/applicationinsights-agent.jar \
+    -jar /opt/pinghome/app.jar
+Restart=always
+RestartSec=5
+# Give Spring Boot + Flyway time to come up before systemd considers a slow start a failure.
+TimeoutStartSec=180
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

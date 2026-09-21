@@ -7,12 +7,16 @@ Android App (Java)
     |
    HTTPS/REST + JWT
     |
-Spring Boot Backend (Cloud Run)
+Spring Boot Backend (Azure VM, systemd + Caddy for HTTPS)
     |
-    +-- Cloud SQL for MySQL           (all persistent state)
+    +-- Azure Database for MySQL      (all persistent state)
+    +-- Azure Application Insights    (telemetry/logs, via the Java agent)
     +-- Firebase Cloud Messaging      (primary push notifications)
     +-- Twilio                       (optional SMS fallback, off by default)
-    +-- Google Maps Platform          (used from the Android client)
+
+Android App also uses, on-device with no backend involvement:
+    +-- Google Play Services          (Fused Location Provider, Geofencing API)
+    +-- OpenStreetMap tiles (osmdroid) (map display - no API key or account)
 
 ESP32 Wearable
     |
@@ -20,6 +24,10 @@ ESP32 Wearable
     |
 Android App
 ```
+
+## UI design
+
+The Android UI follows the "SheGuard" design language supplied as a Jetpack Compose prototype (teal/lavender light mode, crimson/maroon dark mode, pulsing SOS button, rounded cards and pills, rounded bottom navigation). It was ported into the existing Java/XML app rather than adopting the Compose code, so every screen keeps its backend wiring: `res/values/themes.xml` + `colors.xml` (theme tokens), `ui/components/SosButtonView` and `LiveBadgeView` (the two animated components), `ui/main/HomeFragment` (SOS-first landing screen), `ui/trip/TripsFragment` (My trips / Watching toggle). The Home screen's sun/moon toggle switches light/dark and is remembered (`ThemePrefs`). The prototype's static "Tips" screen was not ported.
 
 ## Who owns what
 

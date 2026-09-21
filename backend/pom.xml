@@ -58,6 +58,18 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Schema is created/versioned by migrations (src/main/resources/db/migration), not
+             Hibernate ddl-auto, so the same schema-creation path runs identically against local
+             MySQL and a brand-new managed MySQL instance - see application.yml's flyway config. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

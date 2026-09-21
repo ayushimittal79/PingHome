@@ -1,0 +1,7 @@
+# Caddy terminates HTTPS (certificate from Let's Encrypt, renewed automatically) and proxies
+# to the Spring Boot backend on localhost. __DOMAIN__ is replaced by setup-vm.sh with the VM's
+# public hostname (<label>.<region>.cloudapp.azure.com).
+__DOMAIN__ {
+    encode gzip
+    reverse_proxy 127.0.0.1:8080
+}

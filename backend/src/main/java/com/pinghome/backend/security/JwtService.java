@@ -17,10 +17,14 @@ import java.util.Optional;
 /**
  * Issues and validates the JWTs the Android app carries as a Bearer token on every
  * authenticated request. The secret must be overridden via PINGHOME_JWT_SECRET in any
- * non-local environment; the default below only makes local development work out of the box.
+ * non-local environment; the default in application.yml only makes local development work
+ * out of the box, and the deployed profile refuses to start with it (see application-cloud.yml).
  */
 @Service
 public class JwtService {
+
+    /** Must match the fallback in application.yml - it is public knowledge, so it must never sign real tokens. */
+    static final String LOCAL_DEV_DEFAULT_SECRET = "pinghome-local-development-secret-change-me-please-32bytes+";
 
     private final SecretKey key;
     private final long expirationMinutes;
@@ -29,8 +33,14 @@ public class JwtService {
     public JwtService(
             @Value("${pinghome.jwt.secret}") String secret,
             @Value("${pinghome.jwt.expiration-minutes:10080}") long expirationMinutes,
-            @Value("${pinghome.jwt.issuer:pinghome-backend}") String issuer
+            @Value("${pinghome.jwt.issuer:pinghome-backend}") String issuer,
+            @Value("${pinghome.jwt.reject-default-secret:false}") boolean rejectDefaultSecret
     ) {
+        if (rejectDefaultSecret && LOCAL_DEV_DEFAULT_SECRET.equals(secret)) {
+            throw new IllegalStateException(
+                    "PINGHOME_JWT_SECRET is not set - refusing to start a deployed instance with the "
+                    + "checked-in development secret. Generate one with: openssl rand -base64 48");
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMinutes = expirationMinutes;
         this.issuer = issuer;
