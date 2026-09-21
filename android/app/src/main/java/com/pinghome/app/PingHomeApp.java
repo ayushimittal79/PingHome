@@ -5,12 +5,31 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
+import com.pinghome.app.ui.main.ThemePrefs;
+
+import org.osmdroid.config.Configuration;
+import org.osmdroid.config.IConfigurationProvider;
+
+import java.io.File;
+
 public class PingHomeApp extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        ThemePrefs.applySaved(this);
+        configureMapTiles();
         createNotificationChannels();
+    }
+
+    private void configureMapTiles() {
+        IConfigurationProvider config = Configuration.getInstance();
+        // OSM's tile usage policy requires an identifying User-Agent; the default one gets blocked.
+        config.setUserAgentValue(BuildConfig.APPLICATION_ID);
+        // Keep the tile cache in app-private storage so no storage permission is ever needed.
+        File osmDir = new File(getCacheDir(), "osmdroid");
+        config.setOsmdroidBasePath(osmDir);
+        config.setOsmdroidTileCache(new File(osmDir, "tiles"));
     }
 
     private void createNotificationChannels() {

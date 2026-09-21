@@ -14,12 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
 import com.pinghome.app.R;
 import com.pinghome.app.data.SessionManager;
@@ -28,6 +22,14 @@ import com.pinghome.app.data.api.dto.WatcherAssignment;
 import com.pinghome.app.data.repository.ContactRepository;
 import com.pinghome.app.data.repository.TripRepository;
 
+import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -35,13 +37,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
 
-public class CreateTripActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class CreateTripActivity extends AppCompatActivity {
 
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM d, h:mm a");
 
-    private GoogleMap map;
-    private LatLng selectedDestination;
+    private MapView mapView;
+    private Marker destinationMarker;
+    private GeoPoint selectedDestination;
 
     private ContactRepository contactRepository;
     private TripRepository tripRepository;
@@ -79,8 +82,19 @@ public class CreateTripActivity extends AppCompatActivity implements OnMapReadyC
         watcherList.setAdapter(watcherAdapter);
         loadContacts();
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
-        if (mapFragment != null) mapFragment.getMapAsync(this);
+        setUpMap();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mapView.onPause();
+        super.onPause();
     }
 
     private void loadContacts() {
@@ -92,17 +106,47 @@ public class CreateTripActivity extends AppCompatActivity implements OnMapReadyC
         });
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        // Reasonable default camera (world view) until the traveller taps a destination.
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(20, 0), 2));
-        map.setOnMapClickListener(latLng -> {
-            selectedDestination = latLng;
-            map.clear();
-            map.addMarker(new MarkerOptions().position(latLng).title("Destination"));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+    private void setUpMap() {
+        mapView = findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setMultiTouchControls(true);
+        // The map sits inside a NestedScrollView; without this, vertical drags scroll the page
+        // instead of panning the map.
+        mapView.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
         });
+        // World view until the traveller taps a destination.
+        mapView.getController().setZoom(2.5);
+        mapView.getController().setCenter(new GeoPoint(20.0, 0.0));
+
+        mapView.getOverlays().add(new CopyrightOverlay(this));
+        mapView.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint point) {
+                selectDestination(point);
+                return true;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint point) {
+                return false;
+            }
+        }));
+    }
+
+    private void selectDestination(GeoPoint point) {
+        selectedDestination = point;
+        if (destinationMarker == null) {
+            destinationMarker = new Marker(mapView);
+            destinationMarker.setTitle("Destination");
+            destinationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            mapView.getOverlays().add(destinationMarker);
+        }
+        destinationMarker.setPosition(point);
+        mapView.getController().setZoom(15.0);
+        mapView.getController().animateTo(point);
+        mapView.invalidate();
     }
 
     private void pickExpectedArrival() {
@@ -167,7 +211,7 @@ public class CreateTripActivity extends AppCompatActivity implements OnMapReadyC
 
     private void createTrip(String destinationName, int gracePeriod, List<WatcherAssignment> watchers) {
         CreateTripRequest request = new CreateTripRequest(
-                destinationName, selectedDestination.latitude, selectedDestination.longitude,
+                destinationName, selectedDestination.getLatitude(), selectedDestination.getLongitude(),
                 expectedArrival.toInstant(), gracePeriod, null, watchers);
 
         tripRepository.createTrip(request, result -> {

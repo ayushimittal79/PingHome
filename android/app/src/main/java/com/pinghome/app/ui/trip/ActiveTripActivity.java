@@ -29,6 +29,8 @@ import com.pinghome.app.data.repository.SosRepository;
 import com.pinghome.app.data.repository.TripRepository;
 import com.pinghome.app.location.GeofenceManager;
 import com.pinghome.app.location.LocationTracker;
+import com.pinghome.app.ui.components.LiveBadgeView;
+import com.pinghome.app.ui.components.SosButtonView;
 import com.pinghome.app.ui.fakecall.FakeCallService;
 import com.pinghome.app.util.StatusPillHelper;
 
@@ -59,10 +61,22 @@ public class ActiveTripActivity extends AppCompatActivity {
 
     private TextView statusPill, destinationText, expectedArrivalText, wearableStatusText;
     private View wearableDot;
-    private MaterialButton imSafeButton, sosButton, cancelTripButton;
+    private LiveBadgeView liveBadge;
+    private MaterialButton imSafeButton, cancelTripButton;
+    private SosButtonView sosButton;
+
+    private boolean backgroundLocationAsked = false;
 
     private final ActivityResultLauncher<String> backgroundLocationLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> registerGeofenceIfPossible());
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    registerGeofenceIfPossible();
+                } else {
+                    // Ask once per screen; re-requesting from inside the result callback would loop.
+                    Toast.makeText(this, "Automatic arrival detection needs location set to \"Allow all the time\". "
+                            + "You can still tap I'm Safe when you arrive.", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +100,7 @@ public class ActiveTripActivity extends AppCompatActivity {
         expectedArrivalText = findViewById(R.id.expectedArrivalText);
         wearableStatusText = findViewById(R.id.wearableStatusText);
         wearableDot = findViewById(R.id.wearableDot);
+        liveBadge = findViewById(R.id.liveBadge);
         imSafeButton = findViewById(R.id.imSafeButton);
         sosButton = findViewById(R.id.sosButton);
         cancelTripButton = findViewById(R.id.cancelTripButton);
@@ -135,6 +150,7 @@ public class ActiveTripActivity extends AppCompatActivity {
         expectedArrivalText.setText("Expected by " + DISPLAY_FORMAT.format(trip.expectedArrival));
 
         boolean active = trip.status == TripStatus.ACTIVE;
+        liveBadge.setLive(active);
         imSafeButton.setEnabled(active);
         cancelTripButton.setEnabled(active);
         sosButton.setEnabled(active || trip.status == TripStatus.ESCALATED);
@@ -147,9 +163,9 @@ public class ActiveTripActivity extends AppCompatActivity {
             case CONNECTED -> { colorRes = R.color.safe_green; text = "Wearable connected"; }
             case CONNECTING, SCANNING -> { colorRes = R.color.warning_amber; text = "Connecting to wearable..."; }
             case RECONNECTING -> { colorRes = R.color.warning_amber; text = "Reconnecting to wearable..."; }
-            default -> { colorRes = R.color.charcoal_700; text = "Wearable not connected"; }
+            default -> { colorRes = R.color.neutral_pill; text = "Wearable not connected"; }
         }
-        wearableDot.setBackgroundColor(getColor(colorRes));
+        wearableDot.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(colorRes)));
         wearableStatusText.setText(text);
     }
 
@@ -244,7 +260,10 @@ public class ActiveTripActivity extends AppCompatActivity {
         if (!hasBackground) {
             // Two-step permission flow required on Android 10+: foreground location must already
             // be granted (checked above) before requesting background location separately.
-            backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+            if (!backgroundLocationAsked) {
+                backgroundLocationAsked = true;
+                backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+            }
             return;
         }
 

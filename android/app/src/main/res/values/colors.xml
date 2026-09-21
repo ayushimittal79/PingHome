@@ -1,21 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- PingHome palette (SPEC.md UI direction): deep navy/charcoal, off-white surfaces,
-         muted blue, green=safe, amber=warning, red reserved for SOS only. -->
-    <color name="navy_900">#0F1B2D</color>
-    <color name="navy_800">#16243B</color>
-    <color name="charcoal_700">#2A3342</color>
-    <color name="blue_muted">#5B7FA6</color>
-    <color name="blue_muted_dark">#3E5C7D</color>
+    <!-- SheGuard design language, ported into PingHome (see docs/architecture.md "UI").
+         Light mode: teal / lavender. Dark mode: crimson / maroon. Functional colours are shared. -->
+
+    <!-- Light -->
+    <color name="light_primary">#12B3A8</color>
+    <color name="light_primary_variant">#0E8C84</color>
+    <color name="light_secondary">#6C5CE7</color>
+    <color name="light_background">#F4F7FB</color>
+    <color name="light_surface">#FFFFFF</color>
+    <color name="light_on_background">#1B2430</color>
+    <color name="light_muted">#8B94A3</color>
+    <color name="light_card_alt">#E9F8F6</color>
+    <color name="light_divider">#E3E8EF</color>
+
+    <!-- Dark -->
+    <color name="dark_primary">#E03158</color>
+    <color name="dark_primary_variant">#B5123A</color>
+    <color name="dark_secondary">#FF6B81</color>
+    <color name="dark_background">#170F12</color>
+    <color name="dark_surface">#231419</color>
+    <color name="dark_on_background">#F3E7EA</color>
+    <color name="dark_muted">#B08A93</color>
+    <color name="dark_card_alt">#2E1820</color>
+    <color name="dark_divider">#3A2028</color>
+
+    <!-- Functional (same in both modes): green = safe/live, amber = warning, red = SOS only -->
+    <color name="sos_red">#D81B3F</color>
+    <color name="sos_glow">#33D81B3F</color>
+    <color name="safe_green">#2ECC71</color>
+    <color name="warning_amber">#FFA733</color>
+    <color name="white">#FFFFFF</color>
     <color name="off_white">#F6F5F1</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="surface_dark">#1B2635</color>
-    <color name="safe_green">#2E7D5B</color>
-    <color name="warning_amber">#B8860B</color>
-    <color name="sos_red">#C0392B</color>
-    <color name="text_primary_light">#1B2230</color>
-    <color name="text_secondary_light">#5C6672</color>
-    <color name="text_primary_dark">#EDEFF2</color>
-    <color name="text_secondary_dark">#AEB7C2</color>
-    <color name="divider">#E2E4E8</color>
+    <color name="neutral_pill">#6B7280</color>
+
+    <!-- Fake-call full-screen theme keeps a deep neutral so it reads as a real incoming call -->
+    <color name="navy_900">#0F1B2D</color>
+
+    <!-- Mode-independent aliases resolved per values/values-night (used by drawables/tints) -->
+    <color name="divider">@color/light_divider</color>
+    <color name="charcoal_700">@color/neutral_pill</color>
 </resources>

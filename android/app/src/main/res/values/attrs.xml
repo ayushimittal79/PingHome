@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Extra theme tokens Material3 doesn't define, mirroring SheGuard's extended colours. -->
+    <attr name="colorMuted" format="color" />
+    <attr name="colorCardAlt" format="color" />
+
+    <declare-styleable name="SosButtonView">
+        <attr name="sosSize" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="LiveBadgeView">
+        <attr name="compact" format="boolean" />
+    </declare-styleable>
+</resources>

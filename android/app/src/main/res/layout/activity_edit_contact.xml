@@ -13,8 +13,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Name">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/nameInput"
                 android:layout_width="match_parent"
@@ -25,8 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Phone"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Phone">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phoneInput"
                 android:layout_width="match_parent"
@@ -38,8 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Email (must match their PingHome account to receive alerts)"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Email (must match their PingHome account to receive alerts)">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/emailInput"
                 android:layout_width="match_parent"
@@ -51,8 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Relationship (e.g. Sister, Roommate)"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Relationship (e.g. Sister, Roommate)">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/relationshipInput"
                 android:layout_width="match_parent"
@@ -68,7 +64,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteButton"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.PingHome.Button.Text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

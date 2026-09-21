@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status pill background; tint at runtime (StatusPillHelper) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/neutral_pill" />
+    <corners android:radius="50dp" />
+</shape>

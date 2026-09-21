@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_my_trips" android:title="@string/tab_my_trips" android:icon="@android:drawable/ic_menu_mylocation" />
-    <item android:id="@+id/nav_watching" android:title="@string/tab_watching" android:icon="@android:drawable/ic_menu_view" />
-    <item android:id="@+id/nav_contacts" android:title="@string/tab_contacts" android:icon="@android:drawable/ic_menu_myplaces" />
-    <item android:id="@+id/nav_profile" android:title="@string/tab_profile" android:icon="@android:drawable/ic_menu_manage" />
+    <item android:id="@+id/nav_home" android:title="@string/tab_home" android:icon="@drawable/ic_home" />
+    <item android:id="@+id/nav_trips" android:title="@string/tab_trips" android:icon="@drawable/ic_directions" />
+    <item android:id="@+id/nav_circle" android:title="@string/tab_circle" android:icon="@drawable/ic_group" />
+    <item android:id="@+id/nav_profile" android:title="@string/tab_profile" android:icon="@drawable/ic_person" />
 </menu>

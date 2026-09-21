@@ -8,15 +8,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.pinghome.app.R;
 import com.pinghome.app.data.api.dto.TripResponse;
 import com.pinghome.app.data.repository.TripRepository;
 import com.pinghome.app.util.StatusPillHelper;
+
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.Marker;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +30,8 @@ public class WatcherTripDetailActivity extends AppCompatActivity {
 
     private TripRepository tripRepository;
     private long tripId;
-    private GoogleMap map;
+    private MapView mapView;
+    private Marker locationMarker;
 
     private TextView statusPill, destinationText, expectedArrivalText, locationHintText, noAlertsText;
     private AlertListAdapter alertAdapter;
@@ -61,21 +63,31 @@ public class WatcherTripDetailActivity extends AppCompatActivity {
         }));
         alertsList.setAdapter(alertAdapter);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(googleMap -> {
-                map = googleMap;
-                loadLocation();
-            });
-        }
+        mapView = findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setMultiTouchControls(true);
+        mapView.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
+        mapView.getController().setZoom(2.5);
+        mapView.getController().setCenter(new GeoPoint(20.0, 0.0));
+        mapView.getOverlays().add(new CopyrightOverlay(this));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mapView.onResume();
         loadTrip();
         loadAlerts();
         loadLocation();
+    }
+
+    @Override
+    protected void onPause() {
+        mapView.onPause();
+        super.onPause();
     }
 
     private void loadTrip() {
@@ -102,15 +114,26 @@ public class WatcherTripDetailActivity extends AppCompatActivity {
     }
 
     private void loadLocation() {
-        if (map == null) return;
         tripRepository.latestLocation(tripId, result -> {
             if (result.success && result.data != null) {
-                LatLng position = new LatLng(result.data.latitude, result.data.longitude);
-                map.clear();
-                map.addMarker(new MarkerOptions().position(position).title("Last known location"));
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+                GeoPoint position = new GeoPoint(result.data.latitude, result.data.longitude);
+                if (locationMarker == null) {
+                    locationMarker = new Marker(mapView);
+                    locationMarker.setTitle("Last known location");
+                    locationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                    mapView.getOverlays().add(locationMarker);
+                }
+                locationMarker.setPosition(position);
+                mapView.getController().setZoom(15.0);
+                mapView.getController().setCenter(position);
+                mapView.invalidate();
                 locationHintText.setText("Last updated " + DISPLAY_FORMAT.format(result.data.timestamp));
             } else {
+                if (locationMarker != null) {
+                    mapView.getOverlays().remove(locationMarker);
+                    locationMarker = null;
+                    mapView.invalidate();
+                }
                 locationHintText.setText("Location isn't shared for this trip right now.");
             }
         });

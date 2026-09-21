@@ -1,5 +1,7 @@
 package com.pinghome.app.ui.contacts;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +46,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
         ContactResponse contact = contacts.get(position);
         holder.nameText.setText(contact.name);
+        holder.initialText.setText(contact.name == null || contact.name.isEmpty()
+                ? "?" : contact.name.substring(0, 1).toUpperCase());
 
         StringBuilder detail = new StringBuilder();
         if (contact.relationship != null && !contact.relationship.isEmpty()) detail.append(contact.relationship);
@@ -53,6 +57,13 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         }
         holder.detailText.setText(detail.toString());
         holder.itemView.setOnClickListener(v -> listener.onContactClicked(contact));
+
+        boolean hasPhone = contact.phone != null && !contact.phone.isBlank();
+        holder.callButton.setVisibility(hasPhone ? View.VISIBLE : View.GONE);
+        // ACTION_DIAL opens the dialer with the number filled in; no CALL_PHONE permission and no
+        // call placed until the user confirms - deliberately not an automatic emergency call.
+        holder.callButton.setOnClickListener(v -> v.getContext().startActivity(
+                new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + contact.phone))));
     }
 
     @Override
@@ -63,11 +74,15 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     static class ContactViewHolder extends RecyclerView.ViewHolder {
         final TextView nameText;
         final TextView detailText;
+        final TextView initialText;
+        final View callButton;
 
         ContactViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.nameText);
             detailText = itemView.findViewById(R.id.detailText);
+            initialText = itemView.findViewById(R.id.initialText);
+            callButton = itemView.findViewById(R.id.callButton);
         }
     }
 }

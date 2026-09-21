@@ -15,13 +15,22 @@ android {
         versionName "0.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        // Read from gradle.properties / -P flags / CI secrets - never hard-code real keys here.
-        // See docs/setup.md for how to obtain both. Placeholders keep the project buildable
-        // (with maps/messaging inert) even before those services are provisioned.
-        manifestPlaceholders += [
-                MAPS_API_KEY: project.findProperty("MAPS_API_KEY") ?: "REPLACE_WITH_GOOGLE_MAPS_API_KEY"
-        ]
+    signingConfigs {
+        // Supply a real keystore via Gradle properties (-P flags or ~/.gradle/gradle.properties,
+        // never committed) for a distributable release build; see docs/setup.md. Without one,
+        // release falls back to the debug key so `assembleRelease` still yields an installable
+        // APK for demos.
+        release {
+            def keystorePath = project.findProperty('PINGHOME_KEYSTORE_FILE')
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword project.findProperty('PINGHOME_KEYSTORE_PASSWORD')
+                keyAlias project.findProperty('PINGHOME_KEY_ALIAS')
+                keyPassword project.findProperty('PINGHOME_KEY_PASSWORD')
+            }
+        }
     }
 
     buildTypes {
@@ -32,7 +41,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "BASE_URL", "\"${project.findProperty('PINGHOME_API_BASE_URL') ?: 'https://REPLACE-WITH-CLOUD-RUN-URL/'}\""
+            signingConfig project.findProperty('PINGHOME_KEYSTORE_FILE') ? signingConfigs.release : signingConfigs.debug
+            // Must be the deployed backend's HTTPS origin (network_security_config.xml blocks
+            // cleartext everywhere except the emulator loopback). Pass -PPINGHOME_API_BASE_URL=...
+            buildConfigField "String", "BASE_URL", "\"${project.findProperty('PINGHOME_API_BASE_URL') ?: 'https://REPLACE-WITH-BACKEND-URL/'}\""
             buildConfigField "boolean", "DEMO_MODE", "false"
         }
     }
@@ -66,9 +78,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
-    // Location / Maps / Geofencing
+    // Location / Geofencing (Google Play Services - on-device, no API key or billing needed)
     implementation 'com.google.android.gms:play-services-location:21.3.0'
-    implementation 'com.google.android.gms:play-services-maps:19.0.0'
+    // Map display: OpenStreetMap tiles via osmdroid - no API key, no billing account required.
+    implementation 'org.osmdroid:osmdroid-android:6.1.20'
 
     // Firebase (Cloud Messaging)
     implementation platform('com.google.firebase:firebase-bom:33.1.2')

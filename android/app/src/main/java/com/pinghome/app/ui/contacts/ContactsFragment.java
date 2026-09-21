@@ -53,7 +53,7 @@ public class ContactsFragment extends Fragment {
         swipeRefresh = view.findViewById(R.id.swipeRefresh);
         swipeRefresh.setOnRefreshListener(this::loadContacts);
         emptyText = view.findViewById(R.id.emptyText);
-        emptyText.setText("No trusted contacts yet. Add people who should watch over your trips.");
+        emptyText.setText(R.string.circle_empty);
 
         loadContacts();
     }

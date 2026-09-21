@@ -4,33 +4,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="0.5dp">
+    android:layout_marginBottom="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/alertTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface" />
+            android:textAppearance="@style/TextAppearance.PingHome.TitleMedium" />
 
         <TextView
             android:id="@+id/alertDetailText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.7" />
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.PingHome.BodyMuted" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/resolveButton"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.PingHome.Button.Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"

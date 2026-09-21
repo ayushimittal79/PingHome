@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.PingHome" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/blue_muted</item>
-        <item name="colorPrimaryDark">@color/navy_900</item>
-        <item name="colorOnPrimary">@color/off_white</item>
-        <item name="colorSecondary">@color/navy_800</item>
-        <item name="colorSurface">@color/surface_light</item>
-        <item name="android:colorBackground">@color/off_white</item>
-        <item name="colorOnBackground">@color/text_primary_light</item>
-        <item name="colorOnSurface">@color/text_primary_light</item>
+        <item name="colorPrimary">@color/light_primary</item>
+        <item name="colorPrimaryDark">@color/light_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/light_card_alt</item>
+        <item name="colorOnPrimaryContainer">@color/light_primary_variant</item>
+        <item name="colorSecondary">@color/light_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/light_surface</item>
+        <item name="colorSurfaceVariant">@color/light_card_alt</item>
+        <item name="colorOnSurfaceVariant">@color/light_muted</item>
+        <item name="android:colorBackground">@color/light_background</item>
+        <item name="colorOnBackground">@color/light_on_background</item>
+        <item name="colorOnSurface">@color/light_on_background</item>
+        <item name="colorOutline">@color/light_divider</item>
         <item name="colorError">@color/sos_red</item>
-        <item name="android:statusBarColor">@color/navy_900</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorMuted">@color/light_muted</item>
+        <item name="colorCardAlt">@color/light_card_alt</item>
+        <item name="android:statusBarColor">@color/light_background</item>
+        <item name="android:navigationBarColor">@color/light_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="materialButtonStyle">@style/Widget.PingHome.Button</item>
+        <item name="materialCardViewStyle">@style/Widget.PingHome.Card</item>
+        <item name="textInputStyle">@style/Widget.PingHome.TextInput</item>
+        <item name="bottomNavigationStyle">@style/Widget.PingHome.BottomNav</item>
+        <item name="floatingActionButtonStyle">@style/Widget.PingHome.Fab</item>
     </style>
 
     <style name="Theme.PingHome.FakeCall" parent="Theme.PingHome">
@@ -21,5 +37,126 @@
         <item name="android:colorBackground">@color/navy_900</item>
         <item name="colorOnSurface">@color/off_white</item>
         <item name="colorOnBackground">@color/off_white</item>
+        <item name="android:statusBarColor">@color/navy_900</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- ===== Components ===== -->
+
+    <style name="Widget.PingHome.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PingHome.Label</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <style name="Widget.PingHome.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PingHome.Label</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="strokeColor">?attr/colorOutline</item>
+    </style>
+
+    <style name="Widget.PingHome.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PingHome.Label</item>
+    </style>
+
+    <!-- SheGuard's "quick action pill": icon + label, fully rounded, solid colour -->
+    <style name="Widget.PingHome.Pill" parent="Widget.Material3.Button">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PingHome.Label</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="iconTint">@color/white</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">8dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.PingHome.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">18dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="Widget.PingHome.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.PingHome.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bg_bottom_nav</item>
+        <item name="itemIconTint">@color/bottom_nav_item</item>
+        <item name="itemTextColor">@color/bottom_nav_item</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.PingHome.BottomNav.Indicator</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="elevation">12dp</item>
+    </style>
+
+    <style name="Widget.PingHome.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/bottom_nav_indicator</item>
+    </style>
+
+    <style name="Widget.PingHome.Fab" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="tint">@color/white</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.PingHome.Fab</item>
+    </style>
+
+    <style name="ShapeAppearance.PingHome.Fab" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
+    </style>
+
+    <!-- ===== Typography (SheGuard's Type.kt scale) ===== -->
+
+    <style name="TextAppearance.PingHome.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.BodyMuted" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">?attr/colorMuted</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.Label" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="TextAppearance.PingHome.LabelSmall" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 </resources>

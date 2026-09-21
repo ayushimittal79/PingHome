@@ -18,8 +18,29 @@
     <string name="action_start_trip">Start trip</string>
     <string name="action_cancel_trip">Cancel trip</string>
 
-    <string name="tab_my_trips">My Trips</string>
-    <string name="tab_watching">Watching</string>
-    <string name="tab_contacts">Trusted Circle</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_trips">Trips</string>
+    <string name="tab_circle">Circle</string>
     <string name="tab_profile">Profile</string>
+    <string name="trips_mine">My trips</string>
+    <string name="trips_watching">Watching</string>
+
+    <string name="badge_live_on">Live location on</string>
+    <string name="badge_live_off">Location off</string>
+
+    <string name="home_title">Home</string>
+    <string name="home_headline">Are you in\nan emergency?</string>
+    <string name="home_body">Press SOS and everyone watching you is alerted with your last known location. During a trip, arrival is detected automatically.</string>
+    <string name="home_fake_call">Fake Call</string>
+    <string name="home_open_trip">Live trip</string>
+    <string name="home_start_trip">Start a trip</string>
+    <string name="home_no_trip_title">No trip in progress</string>
+    <string name="home_no_trip_body">Start a trip so your Circle is notified if you don\'t arrive on time.</string>
+    <string name="home_sos_confirm_title">Send SOS now?</string>
+    <string name="home_sos_confirm_body">Your Circle will be alerted immediately with your last known location.</string>
+    <string name="home_sos_send">Send SOS</string>
+
+    <string name="circle_title">My Circle</string>
+    <string name="circle_subtitle">These people can be chosen as watchers for a trip and are alerted the moment you press SOS.</string>
+    <string name="circle_empty">No trusted contacts yet. Tap + to add the people who should watch over your trips.</string>
 </resources>

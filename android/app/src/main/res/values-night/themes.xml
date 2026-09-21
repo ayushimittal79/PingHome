@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.PingHome" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/blue_muted</item>
-        <item name="colorOnPrimary">@color/off_white</item>
-        <item name="colorSecondary">@color/charcoal_700</item>
-        <item name="colorSurface">@color/surface_dark</item>
-        <item name="android:colorBackground">@color/navy_900</item>
-        <item name="colorOnBackground">@color/text_primary_dark</item>
-        <item name="colorOnSurface">@color/text_primary_dark</item>
+        <item name="colorPrimary">@color/dark_primary</item>
+        <item name="colorPrimaryDark">@color/dark_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/dark_card_alt</item>
+        <item name="colorOnPrimaryContainer">@color/dark_secondary</item>
+        <item name="colorSecondary">@color/dark_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/dark_surface</item>
+        <item name="colorSurfaceVariant">@color/dark_card_alt</item>
+        <item name="colorOnSurfaceVariant">@color/dark_muted</item>
+        <item name="android:colorBackground">@color/dark_background</item>
+        <item name="colorOnBackground">@color/dark_on_background</item>
+        <item name="colorOnSurface">@color/dark_on_background</item>
+        <item name="colorOutline">@color/dark_divider</item>
         <item name="colorError">@color/sos_red</item>
-        <item name="android:statusBarColor">@color/navy_900</item>
+        <item name="colorMuted">@color/dark_muted</item>
+        <item name="colorCardAlt">@color/dark_card_alt</item>
+        <item name="android:statusBarColor">@color/dark_background</item>
+        <item name="android:navigationBarColor">@color/dark_surface</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="materialButtonStyle">@style/Widget.PingHome.Button</item>
+        <item name="materialCardViewStyle">@style/Widget.PingHome.Card</item>
+        <item name="textInputStyle">@style/Widget.PingHome.TextInput</item>
+        <item name="bottomNavigationStyle">@style/Widget.PingHome.BottomNav</item>
+        <item name="floatingActionButtonStyle">@style/Widget.PingHome.Fab</item>
     </style>
 </resources>

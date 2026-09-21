@@ -10,9 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <fragment
-            android:id="@+id/mapFragment"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+        <org.osmdroid.views.MapView
+            android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="260dp" />
 
@@ -20,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tap the map to set your destination"
-            android:textColor="?attr/colorOnBackground"
-            android:alpha="0.6"
+            android:textAppearance="@style/TextAppearance.PingHome.BodyMuted"
             android:padding="12dp"
             android:gravity="center" />
 
@@ -34,8 +32,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Destination name"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                android:hint="Destination name">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/destinationNameInput"
                     android:layout_width="match_parent"
@@ -44,7 +41,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/pickTimeButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.PingHome.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -54,8 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:hint="Grace period (minutes)"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                android:hint="Grace period (minutes)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/gracePeriodInput"
                     android:layout_width="match_parent"
@@ -68,16 +64,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Watchers"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnBackground"
+                android:textAppearance="@style/TextAppearance.PingHome.TitleMedium"
                 android:layout_marginTop="20dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Choose who should be notified. Full location is off by default."
-                android:textColor="?attr/colorOnBackground"
-                android:alpha="0.6"
+                android:textAppearance="@style/TextAppearance.PingHome.BodyMuted"
                 android:layout_marginBottom="8dp" />
 
             <androidx.recyclerview.widget.RecyclerView

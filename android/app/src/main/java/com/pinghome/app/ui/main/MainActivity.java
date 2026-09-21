@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -19,13 +20,14 @@ import com.pinghome.app.data.repository.AuthRepository;
 import com.pinghome.app.ui.auth.LoginActivity;
 import com.pinghome.app.ui.contacts.ContactsFragment;
 import com.pinghome.app.ui.trip.CreateTripActivity;
-import com.pinghome.app.ui.trip.MyTripsFragment;
-import com.pinghome.app.ui.watcher.WatchingFragment;
+import com.pinghome.app.ui.trip.TripsFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private BottomNavigationView bottomNav;
 
     private final ActivityResultLauncher<String[]> permissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> { /* no-op: each screen re-checks before using a permission-gated feature */ });
@@ -45,27 +47,38 @@ public class MainActivity extends AppCompatActivity {
         requestEssentialPermissions();
         registerFcmToken();
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        View newTripFab = findViewById(R.id.newTripFab);
+
+        bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment = fragmentFor(item.getItemId());
             if (fragment != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
                         .commit();
+                // Only the Trips tab has "start a new trip" as an action - on every other tab
+                // this FAB would sit on top of (and swallow taps meant for) that fragment's own
+                // controls, e.g. the Circle tab's "add contact" FAB in the same corner.
+                newTripFab.setVisibility(item.getItemId() == R.id.nav_trips ? View.VISIBLE : View.GONE);
                 return true;
             }
             return false;
         });
-        bottomNav.setSelectedItemId(R.id.nav_my_trips);
+        bottomNav.setSelectedItemId(R.id.nav_home);
 
-        findViewById(R.id.newTripFab).setOnClickListener(v ->
+        newTripFab.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateTripActivity.class)));
     }
 
+    /** Lets a fragment (e.g. Home's avatar button) switch tabs through the bottom bar. */
+    public void showTab(int navItemId) {
+        bottomNav.setSelectedItemId(navItemId);
+    }
+
     private Fragment fragmentFor(int itemId) {
-        if (itemId == R.id.nav_my_trips) return new MyTripsFragment();
-        if (itemId == R.id.nav_watching) return new WatchingFragment();
-        if (itemId == R.id.nav_contacts) return new ContactsFragment();
+        if (itemId == R.id.nav_home) return new HomeFragment();
+        if (itemId == R.id.nav_trips) return new TripsFragment();
+        if (itemId == R.id.nav_circle) return new ContactsFragment();
         if (itemId == R.id.nav_profile) return new ProfileFragment();
         return null;
     }

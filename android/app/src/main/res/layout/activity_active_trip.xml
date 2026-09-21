@@ -9,39 +9,54 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="28dp">
 
-        <TextView
-            android:id="@+id/statusPill"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="6dp"
-            android:textColor="@color/off_white"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/statusPill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
+                android:textAppearance="@style/TextAppearance.PingHome.LabelSmall"
+                android:textColor="@color/white" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <com.pinghome.app.ui.components.LiveBadgeView
+                android:id="@+id/liveBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/destinationText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnBackground" />
+            android:textAppearance="@style/TextAppearance.PingHome.Headline" />
 
         <TextView
             android:id="@+id/expectedArrivalText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="?attr/colorOnBackground"
-            android:alpha="0.7" />
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.PingHome.BodyMuted" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0.5dp">
+            android:layout_marginTop="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -50,56 +65,72 @@
                 android:gravity="center_vertical"
                 android:padding="14dp">
 
-                <View
-                    android:id="@+id/wearableDot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:background="@color/charcoal_700" />
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_avatar">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_bluetooth"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/wearableStatusText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="12dp"
                     android:text="Wearable not paired"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:textAppearance="@style/TextAppearance.PingHome.Body" />
+
+                <View
+                    android:id="@+id/wearableDot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/bg_pill" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <com.pinghome.app.ui.components.SosButtonView
+            android:id="@+id/sosButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            app:sosSize="170dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/imSafeButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="4dp"
             android:backgroundTint="@color/safe_green"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="textStart"
             android:text="@string/action_im_safe"
             android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/sosButton"
-            android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/sos_red"
-            android:text="@string/action_sos"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/fakeCallButton"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.PingHome.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
+            app:icon="@drawable/ic_phone"
+            app:iconGravity="textStart"
             android:text="@string/action_fake_call" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancelTripButton"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.PingHome.Button.Text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
+            android:textColor="?attr/colorMuted"
             android:text="@string/action_cancel_trip" />
 
     </LinearLayout>

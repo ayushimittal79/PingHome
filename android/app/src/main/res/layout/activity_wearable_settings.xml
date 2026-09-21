@@ -51,7 +51,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/unpairButton"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.PingHome.Button.Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -67,7 +67,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/devTestSosButton"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.PingHome.Button.Outlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="(Dev only) Simulate wearable SOS"
