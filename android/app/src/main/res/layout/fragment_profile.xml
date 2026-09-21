@@ -103,12 +103,15 @@
             android:text="Safety tools"
             android:textAppearance="@style/TextAppearance.PingHome.TitleMedium" />
 
+        <!-- Hidden: the physical wearable was descoped (see SPEC.md decision note). The BLE
+             pairing screen and relay code remain in the codebase as future scope. -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/wearableSettingsButton"
             style="@style/Widget.PingHome.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="12dp"
+            android:visibility="gone"
             app:icon="@drawable/ic_bluetooth"
             app:iconGravity="textStart"
             android:text="PingHome wearable" />

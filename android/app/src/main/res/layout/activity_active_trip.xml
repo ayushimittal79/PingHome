@@ -53,10 +53,13 @@
             android:layout_marginTop="4dp"
             android:textAppearance="@style/TextAppearance.PingHome.BodyMuted" />
 
+        <!-- Hidden: the physical wearable was descoped; kept for future scope. -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/wearableCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
