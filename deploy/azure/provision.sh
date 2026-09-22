@@ -15,6 +15,9 @@ RG="${PINGHOME_RG:-pinghome-rg}"
 LOCATION="${PINGHOME_LOCATION:-centralindia}"
 VM_NAME="${PINGHOME_VM_NAME:-pinghome-vm}"
 VM_ADMIN="${PINGHOME_VM_ADMIN:-pinghome}"
+# Free-account eligible sizes: Standard_B1s, Standard_B2ats_v2 (AMD), Standard_B2pts_v2 (Arm).
+# Capacity for B-series varies per region/subscription; override if a region reports SkuNotAvailable.
+VM_SIZE="${PINGHOME_VM_SIZE:-Standard_B1s}"
 # Becomes <DNS_LABEL>.<LOCATION>.cloudapp.azure.com - must be globally unique in the region.
 DNS_LABEL="${PINGHOME_DNS_LABEL:-pinghome-$(whoami | tr -cd 'a-z0-9' | cut -c1-10)-$RANDOM}"
 MYSQL_NAME="${PINGHOME_MYSQL_NAME:-pinghome-mysql-$RANDOM}"
@@ -28,16 +31,23 @@ if [[ -z "${PINGHOME_MYSQL_PASSWORD:-}" ]]; then
   exit 1
 fi
 
+echo "==> Registering resource providers (one-time on a new subscription)"
+for ns in Microsoft.Compute Microsoft.Network Microsoft.DBforMySQL Microsoft.Insights Microsoft.OperationalInsights; do
+  if [[ "$(az provider show --namespace "$ns" --query registrationState -o tsv 2>/dev/null)" != "Registered" ]]; then
+    az provider register --namespace "$ns" --wait --output none
+  fi
+done
+
 echo "==> Resource group $RG in $LOCATION"
 az group create --name "$RG" --location "$LOCATION" --output none
 
-echo "==> VM $VM_NAME (Standard_B1s, Ubuntu 24.04, DNS label $DNS_LABEL)"
+echo "==> VM $VM_NAME ($VM_SIZE, Ubuntu 24.04, DNS label $DNS_LABEL)"
 if ! az vm show --resource-group "$RG" --name "$VM_NAME" --output none 2>/dev/null; then
   az vm create \
     --resource-group "$RG" \
     --name "$VM_NAME" \
     --image Ubuntu2404 \
-    --size Standard_B1s \
+    --size "$VM_SIZE" \
     --admin-username "$VM_ADMIN" \
     --generate-ssh-keys \
     --public-ip-sku Standard \
