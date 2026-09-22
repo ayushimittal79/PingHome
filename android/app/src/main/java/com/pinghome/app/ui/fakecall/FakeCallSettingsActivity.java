@@ -1,6 +1,12 @@
 package com.pinghome.app.ui.fakecall;
 
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -47,6 +53,22 @@ public class FakeCallSettingsActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.saveButton).setOnClickListener(v -> save());
+        findViewById(R.id.fullScreenPermissionButton).setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                        .setData(Uri.parse("package:" + getPackageName()))));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Android 14+ grants full-screen notifications only on request; without them the fake call
+        // still works while the app is open (FakeCallService launches the screen directly) but
+        // can't take over a locked screen.
+        boolean needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && !getSystemService(NotificationManager.class).canUseFullScreenIntent();
+        int visibility = needsPermission ? View.VISIBLE : View.GONE;
+        findViewById(R.id.fullScreenHintText).setVisibility(visibility);
+        findViewById(R.id.fullScreenPermissionButton).setVisibility(visibility);
     }
 
     private void updateDelayLabel(int seconds) {

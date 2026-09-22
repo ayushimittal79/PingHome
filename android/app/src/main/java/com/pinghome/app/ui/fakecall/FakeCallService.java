@@ -1,6 +1,8 @@
 package com.pinghome.app.ui.fakecall;
 
+import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -25,7 +27,10 @@ import com.pinghome.app.data.SessionManager;
  */
 public class FakeCallService extends Service {
 
-    private static final int NOTIFICATION_ID = 77;
+    private static final int PREPARING_NOTIFICATION_ID = 77;
+    // Must differ from the foreground-service id: stopForeground(STOP_FOREGROUND_REMOVE) removes
+    // that one, and would otherwise cancel the incoming-call notification the moment it's posted.
+    private static final int CALL_NOTIFICATION_ID = 78;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -34,9 +39,9 @@ public class FakeCallService extends Service {
 
         Notification quiet = buildQuietNotification();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIFICATION_ID, quiet, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+            startForeground(PREPARING_NOTIFICATION_ID, quiet, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else {
-            startForeground(NOTIFICATION_ID, quiet);
+            startForeground(PREPARING_NOTIFICATION_ID, quiet);
         }
         handler.postDelayed(this::showIncomingCall, delaySeconds * 1000L);
         return START_NOT_STICKY;
@@ -64,11 +69,31 @@ public class FakeCallService extends Service {
 
         if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                 == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification);
+            NotificationManagerCompat.from(this).notify(CALL_NOTIFICATION_ID, notification);
+        }
+
+        // While the app is on screen a full-screen intent only appears as a heads-up banner, and on
+        // Android 14+ it is blocked entirely until the user grants "full-screen notifications" - so
+        // open the call screen directly in that case (allowed because the app is in the foreground).
+        // The notification above still covers the locked / backgrounded case.
+        if (isAppInForeground() || !canUseFullScreenIntent()) {
+            startActivity(fullScreenIntent);
         }
 
         stopForeground(STOP_FOREGROUND_REMOVE);
         stopSelf();
+    }
+
+    private boolean isAppInForeground() {
+        ActivityManager.RunningAppProcessInfo state = new ActivityManager.RunningAppProcessInfo();
+        ActivityManager.getMyMemoryState(state);
+        return state.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+    }
+
+    private boolean canUseFullScreenIntent() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return true;
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        return manager != null && manager.canUseFullScreenIntent();
     }
 
     private Notification buildQuietNotification() {

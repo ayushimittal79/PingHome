@@ -44,4 +44,23 @@
         android:layout_marginTop="20dp"
         android:text="Save" />
 
+    <!-- Shown only on Android 14+ while the app lacks the full-screen notification permission -->
+    <TextView
+        android:id="@+id/fullScreenHintText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="To make the simulated call take over a locked screen like a real call, allow full-screen notifications for PingHome."
+        android:textAppearance="@style/TextAppearance.PingHome.BodyMuted"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fullScreenPermissionButton"
+        style="@style/Widget.PingHome.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="8dp"
+        android:text="Allow full-screen notifications"
+        android:visibility="gone" />
+
 </LinearLayout>
