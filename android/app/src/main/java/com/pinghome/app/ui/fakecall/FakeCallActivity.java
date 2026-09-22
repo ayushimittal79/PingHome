@@ -23,7 +23,7 @@ import com.pinghome.app.R;
 public class FakeCallActivity extends AppCompatActivity {
 
     public static final String EXTRA_CALLER_NAME = "caller_name";
-    private static final int NOTIFICATION_ID = 77;
+    private static final int NOTIFICATION_ID = FakeCallService.CALL_NOTIFICATION_ID;
 
     private Ringtone ringtone;
     private Vibrator vibrator;

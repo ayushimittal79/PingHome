@@ -30,7 +30,7 @@ public class FakeCallService extends Service {
     private static final int PREPARING_NOTIFICATION_ID = 77;
     // Must differ from the foreground-service id: stopForeground(STOP_FOREGROUND_REMOVE) removes
     // that one, and would otherwise cancel the incoming-call notification the moment it's posted.
-    private static final int CALL_NOTIFICATION_ID = 78;
+    static final int CALL_NOTIFICATION_ID = 78;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
