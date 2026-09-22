@@ -4,10 +4,14 @@ The backend runs as a plain jar under systemd on a small Azure VM, behind Caddy 
 Azure Database for MySQL as the database and Application Insights for telemetry. Everything is
 scripted under `deploy/azure/` and lives in one resource group, so teardown is one command.
 
-> **Status:** the scripts were written against the Azure CLI reference and pass `bash -n`, but
-> have **not yet been run against a real Azure subscription** (none existed when they were
-> written). The first run is the test. Everything after step 3 below is what to do if it works,
-> and what to check if it doesn't.
+> **Status (2026-09-22):** deployed for real on a Free Trial subscription. Region **southindia**
+> (Central India had no B-series capacity), VM size **Standard_B2ats_v2** (B1s was capacity-blocked
+> in both Indian regions; B2ats_v2 is also in the free 750-hour allowance). First boot ran Flyway
+> against the empty Azure database, Caddy obtained a Let's Encrypt certificate, and the release
+> APK completed the SOS → FCM push test against the cloud backend. Two snags, both now handled in
+> `provision.sh`: new subscriptions must register resource providers first, and the
+> `az consumption budget create` call is rejected by the current API - set the budget alert in
+> the portal (Cost Management → Budgets) instead.
 
 Why a VM rather than a serverless/container platform: `EscalationScheduler` is an in-process
 `@Scheduled` job. It only runs while the JVM is alive, so the backend needs a host that is
@@ -30,12 +34,13 @@ export PINGHOME_MYSQL_PASSWORD="$(openssl rand -base64 24)"   # keep this - you'
 ./deploy/azure/provision.sh
 ```
 
-Creates, in resource group `pinghome-rg` (region `centralindia` by default, override with
-`PINGHOME_LOCATION`):
+Creates, in resource group `pinghome-rg` (region `centralindia` by default; override with
+`PINGHOME_LOCATION`, and the VM size with `PINGHOME_VM_SIZE` - the deployed instance uses
+`PINGHOME_LOCATION=southindia PINGHOME_VM_SIZE=Standard_B2ats_v2`):
 
 | Resource | Size | Free-account coverage |
 |---|---|---|
-| VM `pinghome-vm` | Standard_B1s, Ubuntu 24.04, 30 GB disk | 750 h/month for 12 months |
+| VM `pinghome-vm` | Standard_B1s (or B2ats_v2 / B2pts_v2), Ubuntu 24.04, 30 GB disk | 750 h/month for 12 months |
 | MySQL flexible server | Burstable Standard_B1ms, 32 GB, MySQL 8.0 | 750 h/month + 32 GB for 12 months |
 | Application Insights + Log Analytics workspace | - | 5 GB/month ingestion always free |
 | Public IP (Standard) | - | **not** free: roughly $3-4/month after the first 30 days |
@@ -44,9 +49,11 @@ Creates, in resource group `pinghome-rg` (region `centralindia` by default, over
 It prints the VM hostname (`<label>.centralindia.cloudapp.azure.com`), MySQL host, and the
 Application Insights connection string. The MySQL firewall is opened only for the VM's IP.
 
-If `az vm create` fails with a capacity/SKU error for the region, re-run with
-`PINGHOME_LOCATION=southindia` (or any region listed as available for both B1s VMs and MySQL
-flexible server).
+If `az vm create` fails with `SkuNotAvailable` / capacity restrictions, re-run with another free
+size (`PINGHOME_VM_SIZE=Standard_B2ats_v2`) and/or another region (`PINGHOME_LOCATION=southindia`,
+`southeastasia`). The script is create-if-missing, so re-running never duplicates resources.
+On Windows, run the scripts from Git Bash with a small `az` shim on the PATH that calls
+`az.cmd` (the CLI installs as a batch file).
 
 ## 2. Configure
 

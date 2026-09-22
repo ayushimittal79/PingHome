@@ -31,8 +31,9 @@ Java 21, Caddy and the `deploy/azure/pinghome.service` unit; `deploy/azure/deplo
 jar. The app reads `PORT` and all secrets from `/etc/pinghome/pinghome.env`. The backend code
 has no Azure dependency - the same jar runs locally with `./mvnw spring-boot:run`.
 
-**Free tier:** 750 hours/month of a Standard_B1s VM (1 vCPU, 1 GB RAM) for 12 months - enough
-to run continuously. The Standard public IP attached to it is **not** free (≈ US$3-4/month)
+**Free tier:** 750 hours/month of a Standard_B1s, B2ats_v2 or B2pts_v2 VM for 12 months - enough
+to run continuously. The deployed instance is a B2ats_v2 (2 vCPU, 1 GB) in South India because
+B1s had no capacity in the Indian regions at provisioning time. The Standard public IP attached to it is **not** free (≈ US$3-4/month)
 once the account is upgraded after its first 30 days.
 
 **Why always-on matters:** `EscalationScheduler` polls active trips on a timer inside the JVM.
