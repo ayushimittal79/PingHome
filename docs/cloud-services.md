@@ -19,8 +19,9 @@ deployment configuration. See [deployment.md](deployment.md).
   university's Google or Microsoft organisation - that would put project infrastructure on
   university-owned tenancy without authorisation.
 - The Azure free account requires a Visa/Mastercard credit or non-prepaid debit card (a
-  refundable US$1 verification hold), a phone number and a personal Microsoft account. It does
-  not set up an autopay mandate.
+  refundable US$1 verification hold), a phone number and a personal Microsoft account. In India
+  the bank will register an RBI e-mandate ("autopay") for the card with a high ceiling - that is
+  an authorisation limit, not a charge; any real debit is pre-notified by the bank.
 
 ## 1. Azure Virtual Machine — hosts the backend
 
