@@ -10,7 +10,7 @@ PingHome watches over a solo commuter during a single planned trip and gets help
 
 - **Authentication**: registration, login, BCrypt + JWT, profile, session persistence, logout.
 - **Trusted Circle**: add/edit/remove contacts; assign them as trip watchers with `ALERT_ONLY` or `LOCATION_DURING_TRIP` permission. Unrestricted permanent location access is never the default.
-- **Trip lifecycle**: create (destination, expected arrival, grace period, watchers, preview/confirm) → `ACTIVE` → `COMPLETED` / `ESCALATED` / `CANCELLED`.
+- **Trip lifecycle**: create (destination by place search or map tap, expected arrival auto-suggested from a walking/driving route estimate and editable, grace period, watchers, preview/confirm) → `ACTIVE` → `COMPLETED` / `ESCALATED` / `CANCELLED`.
 - **Active trip screen**: destination, expected arrival, safety status, manual "I'm Safe", destination geofencing, manual SOS, fake incoming call, wearable connection status.
 - **Automatic arrival detection** via Android geofencing (not continuous GPS polling), idempotent, handling permission/background/geofence-registration/connectivity failures.
 - **Manual "I'm Safe"**: idempotent completion, stops monitoring/sharing.

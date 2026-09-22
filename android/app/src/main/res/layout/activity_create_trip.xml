@@ -10,15 +10,36 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/searchLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:hint="Search a place (e.g. Christ University, Bangalore)"
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_search"
+            app:endIconContentDescription="Search">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <org.osmdroid.views.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
-            android:layout_height="260dp" />
+            android:layout_height="240dp" />
 
         <TextView
+            android:id="@+id/mapHintText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tap the map to set your destination"
+            android:text="Search above or tap the map to set your destination"
             android:textAppearance="@style/TextAppearance.PingHome.BodyMuted"
             android:padding="12dp"
             android:gravity="center" />
@@ -39,12 +60,46 @@
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/modeToggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:checkedButton="@id/modeDriving">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/modeWalking"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Walking" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/modeDriving"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Driving / cab" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <TextView
+                android:id="@+id/estimateText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Pick a destination to estimate travel time."
+                android:textAppearance="@style/TextAppearance.PingHome.BodyMuted" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/pickTimeButton"
                 style="@style/Widget.PingHome.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="10dp"
                 android:text="Set expected arrival time" />
 
             <com.google.android.material.textfield.TextInputLayout

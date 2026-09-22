@@ -105,10 +105,22 @@ billing-enabled Google Cloud project (see the top of this file). It needs no API
 account. Location itself - GPS via Fused Location Provider and the Android Geofencing API - is
 Google Play Services on the device and was never affected; it needs no key or billing either.
 
-Limitation worth stating honestly: the public OSM tile servers are volunteer-run with a
-[usage policy](https://operations.osmfoundation.org/policies/tiles/). The app identifies itself
-with its package name as required, and demo-scale traffic is well within policy; a real product
-would use a commercial tile provider.
+Two more OpenStreetMap services back the trip-creation screen (`data/geo/OsmGeoService.java`),
+again with no key or account:
+
+- **Nominatim** (`nominatim.openstreetmap.org`) geocodes the destination the traveller types -
+  the app shows the matching real places in a "Which place?" picker so a typo can't become a
+  wrong geofence - and reverse-geocodes a map tap into a destination name.
+- **OSRM** (`routing.openstreetmap.de`, the FOSSGIS public routers) returns a walking or driving
+  duration from the traveller's current position, which the app turns into a suggested
+  "Arrive by" time (route time + 5 min buffer). The traveller can still override it; the
+  backend never calls these services and only receives the final coordinates and time.
+
+Limitation worth stating honestly: the public OSM tile, Nominatim and OSRM servers are
+volunteer-run with usage policies ([tiles](https://operations.osmfoundation.org/policies/tiles/),
+[Nominatim](https://operations.osmfoundation.org/policies/nominatim/)). The app identifies
+itself with a User-Agent as required, searches only on submit (never per keystroke), and
+demo-scale traffic is well within policy; a real product would use a commercial provider.
 
 ## 5. Twilio — optional SMS fallback (off by default)
 
