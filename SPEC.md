@@ -21,7 +21,7 @@ At the time this file was written, the repository was empty. Nothing has been im
 3. Work incrementally; keep the project buildable; run tests/builds frequently.
 4. Fix errors rather than merely reporting them.
 5. Use Git checkpoints before major architectural changes.
-6. **Never modify or delete `C:\Users\ayush\.git`.** All PingHome work stays inside `C:\Users\ayush\Documents\PingHome`, which has its own independent git repo.
+6. **Never modify or delete `C:\Users\ayush\.git`.** All PingHome work stays inside `C:\Users\ayush\Documents\Projects\PingHome`, which has its own independent git repo.
 7. Do not repeatedly ask about minor implementation decisions — make reasonable professional engineering calls when details are ambiguous, and preserve every mandatory requirement below.
 8. Do not claim something was built, tested, or integrated if it wasn't actually done. No placeholder implementations, TODOs, fake API responses, hard-coded data, or fake wearable/connection states for mandatory features.
 

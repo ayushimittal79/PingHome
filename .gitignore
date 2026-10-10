@@ -3,6 +3,7 @@ backend/target/
 *.class
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
+!android/gradle/wrapper/gradle-wrapper.jar
 
 # --- Android / Gradle ---
 android/.gradle/
