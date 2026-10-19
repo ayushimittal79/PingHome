@@ -9,6 +9,8 @@
 # (B1s VM, Burstable B1ms MySQL with 32 GB). Do not change them without checking the cost
 # estimate the portal shows before creating. See docs/deployment.md for the full runbook.
 set -euo pipefail
+# Git Bash on Windows otherwise rewrites Azure resource IDs (/subscriptions/...) into file paths.
+export MSYS_NO_PATHCONV=1
 
 # ---- Settings (override by exporting before running) --------------------------------------
 RG="${PINGHOME_RG:-pinghome-rg}"

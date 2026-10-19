@@ -12,6 +12,14 @@ scripted under `deploy/azure/` and lives in one resource group, so teardown is o
 > `provision.sh`: new subscriptions must register resource providers first, and the
 > `az consumption budget create` call is rejected by the current API - set the budget alert in
 > the portal (Cost Management → Budgets) instead.
+>
+> **Moved 2026-10-19** to a new Free Trial subscription as the first one approached its day-30
+> limit. Same region and VM size (B1s was again capacity-blocked in South India); the new host
+> is `pinghome-ayushi-5884.southindia.cloudapp.azure.com`. The old database was dumped with
+> `mysqldump` through an SSH tunnel via the old VM (the MySQL firewall only admits the VM) and
+> imported into the new, empty database through the new VM *before* the first `deploy.sh`, so
+> Flyway found the schema at version 1 and migrated nothing. `PINGHOME_JWT_SECRET` was kept, so
+> existing app sessions stay valid. The release APK must be rebuilt with the new base URL.
 
 Why a VM rather than a serverless/container platform: `EscalationScheduler` is an in-process
 `@Scheduled` job. It only runs while the JVM is alive, so the backend needs a host that is
@@ -51,9 +59,13 @@ Application Insights connection string. The MySQL firewall is opened only for th
 
 If `az vm create` fails with `SkuNotAvailable` / capacity restrictions, re-run with another free
 size (`PINGHOME_VM_SIZE=Standard_B2ats_v2`) and/or another region (`PINGHOME_LOCATION=southindia`,
-`southeastasia`). The script is create-if-missing, so re-running never duplicates resources.
+`southeastasia`). The script is create-if-missing, but the MySQL server name gets a random
+suffix on every run: when re-running after the server was already created, pass the existing
+name (`PINGHOME_MYSQL_NAME=pinghome-mysql-NNNNN`) or a second server is created.
 On Windows, run the scripts from Git Bash with a small `az` shim on the PATH that calls
-`az.cmd` (the CLI installs as a batch file).
+`az.cmd` (the CLI installs as a batch file). `provision.sh` sets `MSYS_NO_PATHCONV=1`, because
+Git Bash otherwise rewrites Azure resource IDs (`/subscriptions/...`) into Windows paths and the
+Application Insights step fails.
 
 ## 2. Configure
 
