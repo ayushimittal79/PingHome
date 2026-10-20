@@ -101,8 +101,12 @@ emulator loopback):
 
 ```bash
 cd android
-./gradlew assembleRelease -PPINGHOME_API_BASE_URL=https://<label>.centralindia.cloudapp.azure.com/
+./gradlew assembleRelease
 ```
+
+The deployed origin is set as `PINGHOME_API_BASE_URL` in `android/gradle.properties`; after
+moving the backend to a new host, change it there (or override once with
+`-PPINGHOME_API_BASE_URL=https://<label>.<region>.cloudapp.azure.com/`) and rebuild.
 
 Without a `PINGHOME_KEYSTORE_FILE` property the release APK is signed with the debug key,
 which is fine for sideloading onto demo devices. For a real keystore see [setup.md](setup.md).
