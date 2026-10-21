@@ -2,7 +2,7 @@
 
 A wearable + app safety companion that watches over solo commuters — automatically, quietly, and only when it matters.
 
-PingHome is an academic capstone project combining a native Android app, a cloud-hosted Spring Boot backend (Azure VM + Azure Database for MySQL + Application Insights), Firebase Cloud Messaging, on-device location/geofencing with OpenStreetMap for map display, and a physical ESP32 BLE wearable with a real SOS button into one integrated safety product — not a set of disconnected demos.
+PingHome is an academic capstone project which iscombining a native Android app, a cloud-hosted Spring Boot backend (Azure VM + Azure Database for MySQL + Application Insights), Firebase Cloud Messaging, on-device location/geofencing with OpenStreetMap for map display, and a physical ESP32 BLE wearable with a real SOS button into one integrated safety product — not a set of disconnected demos.
 
 ## What it does
 
